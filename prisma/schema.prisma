@@ -8,9 +8,12 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  debates   Debate[]
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  debates       Debate[]
+  savedInsights FinancialInsight[] // Link RAG data to specific users
+  createdAt     DateTime  @default(now())
 }
 
 model Debate {
@@ -28,5 +31,7 @@ model FinancialInsight {
   id        String   @id @default(uuid())
   content   String
   metadata  Json?
+  userId    String
+  user      User  @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
