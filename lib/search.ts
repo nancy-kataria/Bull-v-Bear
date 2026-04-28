@@ -2,7 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { embed } from 'ai';
 import { prisma } from '@/prisma/prisma';
 
-export async function findRelevantFinance(query: string, limit = 3) {
+export async function findRelevantFinance(query: string, userId: string, limit = 3) {
   // Turning the user's question into a vector 
   const { embedding } = await embed({
     model: openai.embedding('text-embedding-3-small'),
@@ -17,7 +17,8 @@ export async function findRelevantFinance(query: string, limit = 3) {
     SELECT id, content, metadata, 
     1 - (embedding <=> ${vectorString}::vector) as similarity
     FROM "FinancialInsight"
-    WHERE 1 - (embedding <=> ${vectorString}::vector) > 0.5
+    WHERE "userId" = ${userId}
+      AND 1 - (embedding <=> ${vectorString}::vector) > 0.5
     ORDER BY similarity DESC
     LIMIT ${limit}
   `;
