@@ -16,16 +16,18 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(req: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
-    } 
+    }
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
 
     // to gather context (Local RAG + Tavily Web Search)
-    const { text: context } = await generateText({
+    const researchResult = await generateText({
       model: openai("gpt-4o"),
       system:
         "You are a research assistant. Find the most relevant financial facts.",
@@ -46,6 +48,7 @@ export async function POST(req: Request) {
         }),
       },
     });
+    const context = researchResult.text;
 
     // parallel debate (Bull vs Bear)
     const [bull, bear] = await Promise.all([
@@ -79,7 +82,7 @@ export async function POST(req: Request) {
       prompt: `Bull: ${bull.text}\n\nBear: ${bear.text}\n\nOriginal Context: ${context}`,
     });
 
-    const sources = verdict.steps
+    const sources = researchResult.steps
       .flatMap((step) =>
         step.toolResults.map((toolResult) => {
           return toolResult.output;
@@ -91,7 +94,7 @@ export async function POST(req: Request) {
       bull: bull.text,
       bear: bear.text,
       decision: verdict.output,
-      sources: JSON.stringify(sources),
+      sources: sources,
     });
   } catch (error) {
     console.error("Chat Error:", error);
