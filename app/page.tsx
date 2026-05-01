@@ -138,6 +138,39 @@ function Hero() {
             <Stat value="12+" label="Sources / case" />
           </div>
         </div>
+
+        {/* Verdict card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, rotateX: 12 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
+          className="relative"
+        >
+          <div className="animate-float">
+            <VerdictCard
+              tilt
+              ticker="$NVDA"
+              price="$1,142.83"
+              change="+4.21%"
+              changePositive
+              verdict="BUY"
+              confidence={0.94}
+              sources={14}
+              bullPoints={[
+                { label: "Data-center revenue", detail: "+154% YoY · $22.6B run-rate" },
+                { label: "Blackwell pipeline", detail: "Booked through FY26 · 80% margins" },
+                { label: "CUDA moat", detail: "4M+ devs · zero credible alternative" },
+                { label: "Hyperscaler capex", detail: "MSFT/META/GOOG guided +28%" },
+              ]}
+              bearPoints={[
+                { label: "Concentration risk", detail: "Top-4 = 46% of revenue" },
+                { label: "Valuation stretch", detail: "P/E 71x · 5y avg 48x" },
+                { label: "China export curbs", detail: "$8B revenue at risk in '26" },
+                { label: "Custom silicon", detail: "AWS Trainium, Google TPU ramp" },
+              ]}
+            />
+          </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -281,37 +314,6 @@ function Manifesto() {
           </button>
         </div>
       </div>
-      <motion.div
-          initial={{ opacity: 0, y: 30, rotateX: 12 }}
-          animate={{ opacity: 1, y: 0, rotateX: 0 }}
-          transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
-          className="relative"
-        >
-          <div className="animate-float">
-            <VerdictCard
-              tilt
-              ticker="$NVDA"
-              price="$1,142.83"
-              change="+4.21%"
-              changePositive
-              verdict="BUY"
-              confidence={0.94}
-              sources={14}
-              bullPoints={[
-                { label: "Data-center revenue", detail: "+154% YoY · $22.6B run-rate" },
-                { label: "Blackwell pipeline", detail: "Booked through FY26 · 80% margins" },
-                { label: "CUDA moat", detail: "4M+ devs · zero credible alternative" },
-                { label: "Hyperscaler capex", detail: "MSFT/META/GOOG guided +28%" },
-              ]}
-              bearPoints={[
-                { label: "Concentration risk", detail: "Top-4 = 46% of revenue" },
-                { label: "Valuation stretch", detail: "P/E 71x · 5y avg 48x" },
-                { label: "China export curbs", detail: "$8B revenue at risk in '26" },
-                { label: "Custom silicon", detail: "AWS Trainium, Google TPU ramp" },
-              ]}
-            />
-          </div>
-        </motion.div>
     </section>
   );
 }
