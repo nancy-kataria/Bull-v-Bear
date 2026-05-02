@@ -10,8 +10,8 @@ import {
   FileSearch,
   Users,
 } from "lucide-react";
-import { TickerTape } from "./components/TickerTape";
-import { VerdictCard } from "./components/VerdictCard";
+import { TickerTape } from "../components/TickerTape";
+import { VerdictCard } from "../components/VerdictCard";
 
 export default function Index() {
   return (
