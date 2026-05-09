@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, ChevronRight, FileText, Globe, StickyNote } from 'lucide-react';
-import type { VerdictData, VerdictType } from '@/types';
+import type { DisplayVerdictCardProps, VerdictType } from '@/types';
 import Gauge from '@/components/Gauge';
 import RiskPill from '@/components/RiskPill';
-
-interface Props {
-  data: VerdictData;
-  animate?: boolean;
-}
 
 const verdictConfig: Record<VerdictType, { label: string; bg: string; border: string; text: string; glow: string; ambient: string }> = {
   BUY: {
@@ -42,13 +37,27 @@ const sourceIcon = (type: string) => {
   return <Globe size={12} />;
 };
 
-export default function DisplayVerdictCard({ data, animate = false }: Props) {
+export default function DisplayVerdictCard({ data, animate = false }: DisplayVerdictCardProps) {
   const [hoveredRisk, setHoveredRisk] = useState<string | null>(null);
   const [sourcesExpanded, setSourcesExpanded] = useState(false);
   const cfg = verdictConfig[data.verdict];
+  let quoteSummary = null;
 
-  const isHighlighted = (arg: { riskTag?: string }) =>
-    hoveredRisk && arg.riskTag === hoveredRisk;
+  if (data.price !== undefined && data.change !== undefined && data.changePct !== undefined) {
+    const price = data.price;
+    const change = data.change;
+    const changePct = data.changePct;
+
+    quoteSummary = (
+      <div className="flex items-center gap-2 mt-0.5">
+        <span className="font-mono font-semibold text-neutral-white">${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+        <span className={`flex items-center gap-0.5 text-xs font-mono font-medium px-1.5 py-0.5 rounded ${change >= 0 ? 'bg-bull-dim text-bull' : 'bg-bear-dim text-bear'}`}>
+          {change >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+          {change >= 0 ? '+' : ''}{changePct.toFixed(2)}%
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -64,72 +73,18 @@ export default function DisplayVerdictCard({ data, animate = false }: Props) {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-mono font-bold text-xl text-neutral-white tracking-wider">${data.ticker}</span>
-              <span className="text-xs font-mono text-neutral-muted">{data.companyName}</span>
+              {data.companyName && <span className="text-xs font-mono text-neutral-muted">{data.companyName}</span>}
             </div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="font-mono font-semibold text-neutral-white">${data.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-              <span className={`flex items-center gap-0.5 text-xs font-mono font-medium px-1.5 py-0.5 rounded ${data.change >= 0 ? 'bg-bull-dim text-bull' : 'bg-bear-dim text-bear'}`}>
-                {data.change >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                {data.change >= 0 ? '+' : ''}{data.changePct.toFixed(2)}%
-              </span>
-            </div>
+            {quoteSummary ?? (
+              <div className="mt-0.5 inline-flex items-center rounded-md border border-border bg-surface px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                Live chat answer
+              </div>
+            )}
           </div>
         </div>
         <Gauge confidence={data.confidence} verdict={data.verdict} size={120} />
       </div>
 
-      {/* Split view */}
-      <div className="grid grid-cols-2 divide-x divide-neutral-border">
-        {/* Bull column */}
-        <div className="p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-bull animate-pulse" />
-            <span className="text-xs font-mono font-semibold text-bull tracking-widest uppercase">Bull Case</span>
-          </div>
-          <ul className="space-y-3">
-            {data.bullArguments.map((arg, i) => (
-              <li
-                key={i}
-                className={`
-                  flex gap-2.5 text-sm transition-all duration-200
-                  ${isHighlighted(arg) ? 'bg-bull-dim/30 -mx-2 px-2 py-1.5 rounded-lg' : ''}
-                `}
-              >
-                <ChevronRight size={14} className="text-bull shrink-0 mt-0.5" />
-                <span className={`leading-snug ${arg.weight === 'strong' ? 'text-neutral-white' : arg.weight === 'moderate' ? 'text-neutral-bright' : 'text-neutral-label'}`}>
-                  {arg.point}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Bear column */}
-        <div className="p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-bear animate-pulse" />
-            <span className="text-xs font-mono font-semibold text-bear tracking-widest uppercase">Bear Case</span>
-          </div>
-          <ul className="space-y-3">
-            {data.bearArguments.map((arg, i) => (
-              <li
-                key={i}
-                className={`
-                  flex gap-2.5 text-sm transition-all duration-200
-                  ${isHighlighted(arg) ? 'bg-bear-dim/30 -mx-2 px-2 py-1.5 rounded-lg' : ''}
-                `}
-              >
-                <ChevronRight size={14} className="text-bear shrink-0 mt-0.5" />
-                <span className={`leading-snug ${arg.weight === 'strong' ? 'text-neutral-white' : arg.weight === 'moderate' ? 'text-neutral-bright' : 'text-neutral-label'}`}>
-                  {arg.point}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* Risk pills */}
       <div className="px-5 py-3 border-t border-neutral-border flex flex-wrap gap-2">
         <span className="text-xs text-neutral-muted font-mono mr-1 self-center">RISKS:</span>
         {data.riskTags.map(tag => (
@@ -142,7 +97,6 @@ export default function DisplayVerdictCard({ data, animate = false }: Props) {
         ))}
       </div>
 
-      {/* Verdict footer */}
       <div
         className={`
           flex items-center justify-between px-5 py-4
@@ -151,17 +105,16 @@ export default function DisplayVerdictCard({ data, animate = false }: Props) {
         `}
       >
         <div>
-          <div className="text-xs font-mono text-neutral-muted tracking-widest uppercase mb-1">Judge's Verdict</div>
+          <div className="text-xs font-mono text-neutral-muted tracking-widest uppercase mb-1">Judge&apos;s Verdict</div>
           <div className={`font-mono font-black text-3xl tracking-widest ${cfg.text} ${data.verdict === 'BUY' ? 'text-glow-bull' : data.verdict === 'SELL' ? 'text-glow-bear' : 'text-glow-amber'}`}>
             {cfg.label}
           </div>
         </div>
         <div className="max-w-sm">
-          <p className="text-xs text-neutral-label leading-relaxed italic">"{data.summary}"</p>
+          <p className="text-xs text-neutral-label leading-relaxed italic">&quot;{data.summary}&quot;</p>
         </div>
       </div>
 
-      {/* Evidence folder */}
       <div className="border-t border-neutral-border">
         <button
           onClick={() => setSourcesExpanded(!sourcesExpanded)}

@@ -14,13 +14,14 @@ import { useState } from "react";
 import { TickerTape } from "../components/TickerTape";
 import { VerdictCard } from "../components/VerdictCard";
 import { SignInModal } from "../components/SignInModal";
+import type { NavProps, StatProps } from '@/types';
 
 export default function Index() {
   const [showSignInModal, setShowSignInModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Nav showSignInModal={showSignInModal} setShowSignInModal={setShowSignInModal} />
+      <Nav setShowSignInModal={setShowSignInModal} />
       <Hero />
       <TickerTape />
       <HowItWorks />
@@ -31,7 +32,7 @@ export default function Index() {
   );
 }
 
-function Nav({ setShowSignInModal }: { showSignInModal: boolean; setShowSignInModal: (value: boolean) => void }) {
+function Nav({ setShowSignInModal }: NavProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -184,7 +185,7 @@ function Hero() {
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function Stat({ value, label }: StatProps) {
   return (
     <div>
       <div className="font-mono text-xl font-semibold tabular-nums">

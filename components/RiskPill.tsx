@@ -1,13 +1,7 @@
 import { useState } from 'react';
+import type { RiskPillProps } from '@/types';
 
-interface Props {
-  tag: string;
-  relatedSentence?: string;
-  onHover: (tag: string | null) => void;
-  active: boolean;
-}
-
-export default function RiskPill({ tag, onHover, active }: Props) {
+export default function RiskPill({ tag, onHover, active }: RiskPillProps) {
   const [hovered, setHovered] = useState(false);
 
   const handleEnter = () => {

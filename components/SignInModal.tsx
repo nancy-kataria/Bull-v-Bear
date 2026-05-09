@@ -4,11 +4,7 @@ import { useState } from 'react'
 import { signInWithEmail } from '@/app/auth/actions'
 import { useRouter } from 'next/navigation'
 import { X, Loader2 } from 'lucide-react'
-
-interface SignInModalProps {
-  isOpen: boolean
-  onClose: () => void
-}
+import type { SignInModalProps } from '@/types'
 
 export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const router = useRouter()
@@ -33,7 +29,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
 
       // Redirect to /chat on successful login
       router.push('/chat')
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
       setLoading(false)
     }

@@ -1,11 +1,7 @@
 import { Check, Loader2 } from 'lucide-react';
-import type { ProcessingStep } from '@/types';
+import type { ProcessingStepsProps } from '@/types';
 
-interface Props {
-  steps: ProcessingStep[];
-}
-
-export default function ProcessingSteps({ steps }: Props) {
+export default function ProcessingSteps({ steps }: ProcessingStepsProps) {
   return (
     <div className="space-y-2">
       {steps.map((step, i) => (

@@ -1,28 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, Gavel, TrendingUp, TrendingDown, FileText } from "lucide-react";
 import { ConfidenceGauge } from "./ConfidenceGauge";
+import type { VerdictCardProps, VerdictType } from '@/types';
 
-type Verdict = "BUY" | "SELL" | "HOLD";
-
-interface Bullet {
-  label: string;
-  detail: string;
-}
-
-interface VerdictCardProps {
-  ticker: string;
-  price: string;
-  change: string;
-  changePositive?: boolean;
-  verdict: Verdict;
-  confidence: number;
-  bullPoints: Bullet[];
-  bearPoints: Bullet[];
-  sources?: number;
-  tilt?: boolean;
-}
-
-const verdictTone: Record<Verdict, { color: string; glow: string; bg: string; label: string }> = {
+const verdictTone: Record<VerdictType, { color: string; glow: string; bg: string; label: string }> = {
   BUY: { color: "var(--bull)", glow: "var(--glow-bull)", bg: "var(--gradient-bull)", label: "BUY" },
   SELL: { color: "var(--bear)", glow: "var(--glow-bear)", bg: "var(--gradient-bear)", label: "SELL" },
   HOLD: { color: "var(--judge)", glow: "var(--glow-judge)", bg: "var(--gradient-judge)", label: "HOLD" },

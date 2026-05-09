@@ -1,11 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { VerdictType } from '@/types';
-
-interface Props {
-  confidence: number;
-  verdict: VerdictType;
-  size?: number;
-}
+import type { GaugeProps, VerdictType } from '@/types';
 
 const verdictColor: Record<VerdictType, string> = {
   BUY: '#10B981',
@@ -13,7 +7,7 @@ const verdictColor: Record<VerdictType, string> = {
   HOLD: '#FFBF00',
 };
 
-export default function Gauge({ confidence, verdict, size = 160 }: Props) {
+export default function Gauge({ confidence, verdict, size = 160 }: GaugeProps) {
   const [animatedValue, setAnimatedValue] = useState(0);
   const rafRef = useRef<number>(0);
 
