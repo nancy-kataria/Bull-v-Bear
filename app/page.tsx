@@ -69,10 +69,13 @@ function Nav({ setShowSignInModal }: NavProps) {
           >
             Sign in
           </button>
-          <button className="group inline-flex items-center gap-1.5 rounded-md bg-system px-3.5 py-2 text-sm font-medium text-system-foreground shadow-[var(--glow-system)] transition hover:brightness-110">
+          <Link 
+            href="/chat"
+            className="group inline-flex items-center gap-1.5 rounded-md bg-system px-3.5 py-2 text-sm font-medium text-system-foreground shadow-[var(--glow-system)] transition hover:brightness-110"
+          >
             Enter Chambers
             <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-          </button>
+          </Link>
         </div>
       </div>
     </header>
