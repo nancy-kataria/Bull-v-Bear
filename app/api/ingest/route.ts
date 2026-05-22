@@ -18,11 +18,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { content, metadata } = await req.json();
+    const { content, metadata, ticker } = await req.json();
 
-    if (!content) {
+    if (!content || !ticker) {
       return NextResponse.json(
-        { error: "Content is required" },
+        { error: "Content and Ticker are required" },
         { status: 400 },
       );
     }
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     // Generating the embeddings
     const { embedding } = await embed({
       model: openai.embedding("text-embedding-3-small"),
-      value: content,
+      value: `Ticker: ${ticker} - ${content}`,
     });
 
     const vectorString = `[${embedding.join(",")}]`;
@@ -38,13 +38,14 @@ export async function POST(req: Request) {
     // using Prisma to save the text and metadata
     // raw SQL for pgvector
     await prisma.$executeRaw`
-    INSERT INTO "FinancialInsight" (id, content, metadata, embedding, "userId")
+    INSERT INTO "FinancialInsight" (id, content, metadata, embedding, "userId", "ticker")
       VALUES (
         gen_random_uuid(), 
         ${content}, 
-        ${JSON.stringify(metadata)}::jsonb, 
+        ${JSON.stringify({ ...metadata, ticker })}::jsonb, 
         ${vectorString}::vector,
-        ${user.id} 
+        ${user.id},
+        ${ticker.toUpperCase()} 
       )
     `;
 
