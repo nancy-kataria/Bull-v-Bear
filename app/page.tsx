@@ -45,7 +45,7 @@ function Nav({ setShowSignInModal }: NavProps) {
             />
           </div>
           <span className="font-mono text-sm font-semibold tracking-wide">
-            JuryMind
+            Bull v. Bear
           </span>
           <span className="ml-1 hidden rounded-md border border-border bg-surface px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground sm:inline">
             v0.1 · Beta
@@ -100,7 +100,7 @@ function Hero() {
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-bull" />
             </span>
             <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              Multi-agent deliberation engine
+              AI-powered investment research assistant
             </span>
           </motion.div>
 
@@ -111,9 +111,9 @@ function Hero() {
             className="mt-6 text-balance text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl"
           >
             Don&apos;t just trade.
-            <br />
+            {/* <br /> */}
             <span className="bg-gradient-to-r from-foreground via-system to-bull bg-clip-text text-transparent">
-              Deliberate.
+              Put your investments on trial.
             </span>
           </motion.h1>
 
@@ -123,7 +123,7 @@ function Hero() {
             transition={{ duration: 0.6, delay: 0.12 }}
             className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground"
           >
-            The first multi-agent financial jury that debates your investments
+            A multi-agent financial jury that debates your investments
             before you make them. A Bull and a Bear argue. A Judge decides.
           </motion.p>
 
@@ -141,14 +141,6 @@ function Hero() {
               See a sample verdict
             </button>
           </motion.div>
-
-          <div className="mt-10 flex items-center gap-6">
-            <Stat value="2.4s" label="Avg deliberation" />
-            <Divider />
-            <Stat value="94%" label="Verdict accuracy" />
-            <Divider />
-            <Stat value="12+" label="Sources / case" />
-          </div>
         </div>
 
         {/* Verdict card */}
@@ -212,7 +204,7 @@ function HowItWorks() {
       tone: "system",
       tag: "01 · Discovery",
       title: "We gather the evidence.",
-      desc: "We scour your private notes (Prisma) and the live web (Tavily AI) to compile every relevant exhibit before opening arguments.",
+      desc: "We scour your private notes and the live web to compile every relevant exhibit before opening arguments.",
     },
     {
       icon: Users,
@@ -308,7 +300,7 @@ function Manifesto() {
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
           One model whispering an answer is a guess. Two adversaries arguing,
-          judged by a third, is a process. JuryMind turns AI output into
+          judged by a third, is a process. Bull v. Bear turns AI output into
           evidence — auditable, citable, defensible.
         </p>
 
@@ -321,7 +313,7 @@ function Manifesto() {
 
         <div className="mt-8 flex justify-center">
           <button className="group inline-flex items-center gap-2 rounded-lg bg-system px-5 py-3 text-sm font-semibold text-system-foreground shadow-[var(--glow-system)] transition hover:brightness-110">
-            Request access
+            Sign up to access
             <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
           </button>
         </div>
@@ -336,7 +328,7 @@ function Footer() {
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
         <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
           <Scale className="h-3.5 w-3.5 text-system" />
-          <span>JuryMind © 2026 · Not financial advice</span>
+          <span>Bull v. Bear © 2026 · Not financial advice</span>
         </div>
         <div className="flex items-center gap-5 text-xs text-muted-foreground">
           <a className="hover:text-foreground" href="#">
