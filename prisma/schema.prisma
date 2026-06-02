@@ -12,20 +12,49 @@ model User {
   email         String    @unique
   name          String?
   debates       Debate[]
+  tickers       Ticker[]
   savedInsights FinancialInsight[]
   createdAt     DateTime  @default(now())
+}
+
+model Ticker {
+  id          String        @id @default(cuid())
+  symbol      String        @db.VarChar(10) // e.g., "NVDA", "VIX"
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes       TradingNote[] 
+  debates     Debate[]      
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Ensures a user can't add the same ticker folder twice
+  @@unique([userId, symbol]) 
+  @@index([userId])
+}
+
+model TradingNote {
+  id        String   @id @default(cuid())
+  userId    String   
+  tickerId  String   
+  ticker    Ticker   @relation(fields: [tickerId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, ticker]) 
 }
 
 model Debate {
   id           String   @id @default(cuid())
   userId       String
-  ticker       String   
+  user         User     @relation(fields: [userId], references: [id])
+  tickerId     String   // Tied to the specific ticker folder
+  ticker       Ticker   @relation(fields: [tickerId], references: [id], onDelete: Cascade) 
   userQuery    String
   bullResponse Json     
   bearResponse Json     
   judgeVerdict Json     
   createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id])
 
   @@index([userId, ticker])
 }
@@ -37,15 +66,4 @@ model FinancialInsight {
   userId    String
   user      User  @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
-}
-
-model TradingNote {
-  id        String   @id @default(cuid())
-  userId    String   
-  ticker    String   @db.VarChar(10)
-  content   String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId, ticker]) 
 }
