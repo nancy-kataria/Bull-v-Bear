@@ -40,20 +40,20 @@ model TradingNote {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, ticker]) 
+  @@index([userId, tickerId]) 
 }
 
 model Debate {
   id           String   @id @default(cuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id])
-  tickerId     String   // Tied to the specific ticker folder
-  ticker       Ticker   @relation(fields: [tickerId], references: [id], onDelete: Cascade) 
+  tickerId     String   // The foreign key scalar field
+  ticker       Ticker   @relation(fields: [tickerId], references: [id], onDelete: Cascade)
   userQuery    String
   bullResponse Json     
   bearResponse Json     
   judgeVerdict Json     
   createdAt    DateTime @default(now())
 
-  @@index([userId, ticker])
+  @@index([userId, tickerId])
 }
