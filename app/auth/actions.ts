@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import { prisma } from '@/prisma/prisma'
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
@@ -11,7 +12,7 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: `${origin}/auth/callback?next=/dashboard`,
     },
   })
 
@@ -24,16 +25,63 @@ export async function signInWithGoogle() {
   return redirect(data.url)
 }
 
-export async function signInWithEmail(email: string, password: string) {
+export async function signUpWithEmail(email: string, password: string) {
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
   })
 
   if (error) {
     return { success: false, error: error.message }
+  }
+
+  // Create user record in database if sign up was successful
+  if (data.user) {
+    const existingUser = await prisma.user.findUnique({
+      where: { id: data.user.id }
+    })
+    
+    if (!existingUser) {
+      await prisma.user.create({
+        data: {
+          id: data.user.id,
+          email: data.user.email || '',
+        }
+      })
+    }
+  }
+
+  return { success: true, message: 'Check your email to verify your account' }
+}
+
+export async function signInWithEmail(email: string, password: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  // Ensure user record exists in database
+  if (data.user) {
+    const existingUser = await prisma.user.findUnique({
+      where: { id: data.user.id }
+    })
+    
+    if (!existingUser) {
+      await prisma.user.create({
+        data: {
+          id: data.user.id,
+          email: data.user.email || '',
+        }
+      })
+    }
   }
 
   return { success: true }
