@@ -14,25 +14,28 @@ import { useState } from "react";
 import { TickerTape } from "../components/TickerTape";
 import { VerdictCard } from "../components/VerdictCard";
 import { SignInModal } from "../components/SignInModal";
+import { SignUpModal } from "../components/SignUpModal";
 import type { NavProps, StatProps } from '@/types';
 
 export default function Index() {
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Nav setShowSignInModal={setShowSignInModal} />
+      <Nav setShowSignInModal={setShowSignInModal} setShowSignUpModal={setShowSignUpModal} />
       <Hero />
       <TickerTape />
       <HowItWorks />
       <Manifesto />
       <Footer />
       <SignInModal isOpen={showSignInModal} onClose={() => setShowSignInModal(false)} />
+      <SignUpModal isOpen={showSignUpModal} onClose={() => setShowSignUpModal(false)} />
     </div>
   );
 }
 
-function Nav({ setShowSignInModal }: NavProps) {
+function Nav({ setShowSignInModal, setShowSignUpModal }: NavProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -68,6 +71,12 @@ function Nav({ setShowSignInModal }: NavProps) {
             className="hidden rounded-md px-3 py-2 text-sm text-muted-foreground transition hover:text-foreground sm:inline"
           >
             Sign in
+          </button>
+          <button 
+            onClick={() => setShowSignUpModal(true)}
+            className="hidden rounded-md px-3.5 py-2 text-sm font-medium border border-system text-system transition hover:bg-system/10 sm:inline"
+          >
+            Sign up
           </button>
           <Link 
             href="/chat"

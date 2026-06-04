@@ -103,8 +103,14 @@ export interface SignInModalProps {
   onClose: () => void;
 }
 
+export interface SignUpModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
 export interface NavProps {
   setShowSignInModal: (value: boolean) => void;
+  setShowSignUpModal: (value: boolean) => void;
 }
 
 export interface StatProps {
@@ -151,4 +157,30 @@ export interface TickerItem {
 export interface ActiveTradedItem {
   ticker: string;
   change_percentage: string;
+}
+
+export interface Ticker {
+  id: string;
+  symbol: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TradingNote {
+  id: string;
+  userId: string;
+  tickerId: string;
+  ticker?: Ticker;
+  content: string;
+  chunks?: NoteChunk[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface NoteChunk {
+  id: string;
+  noteId: string;
+  note?: TradingNote;
+  chunkContent: string;
 }
