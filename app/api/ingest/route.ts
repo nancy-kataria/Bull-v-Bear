@@ -16,42 +16,51 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { content, metadata, ticker } = await req.json();
+    const { content, ticker, noteId } = await req.json();
 
-    if (!content || !ticker) {
+    if (!content || !ticker || !noteId) {
       return NextResponse.json(
-        { error: "Content and Ticker are required" },
+        { error: "Content, ticker, and noteId are required" },
         { status: 400 },
       );
     }
 
-    // Find or create the ticker for this user
-    const tickerRecord = await prisma.ticker.upsert({
-      where: {
-        userId_symbol: {
-          userId: user.id,
-          symbol: ticker.toUpperCase(),
-        },
-      },
-      update: {},
-      create: {
-        symbol: ticker.toUpperCase(),
-        userId: user.id,
-      },
+    // Verify the note belongs to the user
+    const note = await prisma.tradingNote.findUnique({
+      where: { id: noteId },
+      include: { ticker: true },
     });
 
-    // Save the trading note
-    await prisma.tradingNote.create({
-      data: {
-        content,
-        userId: user.id,
-        tickerId: tickerRecord.id,
-      },
-    });
+    if (!note || note.userId !== user.id) {
+      return NextResponse.json(
+        { error: "Note not found or unauthorized" },
+        { status: 404 },
+      );
+    }
+
+    // Create a note chunk for embeddings/vector storage
+    // Split content into chunks if it's large (e.g., > 1000 chars)
+    const chunkSize = 1000;
+    const chunks = [];
+    
+    for (let i = 0; i < content.length; i += chunkSize) {
+      chunks.push(content.substring(i, i + chunkSize));
+    }
+
+    // Create note chunks
+    for (const chunkContent of chunks) {
+      await prisma.noteChunk.create({
+        data: {
+          noteId,
+          chunkContent,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
       message: "Data ingested successfully",
+      chunksCreated: chunks.length,
     });
   } catch (error) {
     console.error("Ingestion error:", error);
