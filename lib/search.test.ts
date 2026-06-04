@@ -3,7 +3,7 @@ import { findRelevantFinance } from './search';
 
 vi.mock('@/prisma/prisma', () => ({
   prisma: {
-    tradingNote: {
+    noteChunk: {
       findMany: vi.fn(),
     },
   },
@@ -20,15 +20,20 @@ describe('findRelevantFinance', () => {
     const mockResults = [
       {
         id: '1',
-        content: 'Tech stocks are rising',
-        userId: 'user-1',
-        tickerId: 'ticker-1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ticker: { id: 'ticker-1', symbol: 'TECH', userId: 'user-1', createdAt: new Date(), updatedAt: new Date() },
+        noteId: 'note-1',
+        chunkContent: 'Tech stocks are rising',
+        note: {
+          id: 'note-1',
+          content: 'Full content',
+          userId: 'user-1',
+          tickerId: 'ticker-1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          ticker: { id: 'ticker-1', symbol: 'TECH', userId: 'user-1', createdAt: new Date(), updatedAt: new Date() },
+        },
       },
     ];
-    vi.mocked(prisma.tradingNote.findMany).mockResolvedValue(mockResults);
+    vi.mocked(prisma.noteChunk.findMany).mockResolvedValue(mockResults);
 
     const results = await findRelevantFinance('stock market trends');
     expect(results).toHaveLength(1);
@@ -38,47 +43,57 @@ describe('findRelevantFinance', () => {
   it('should filter results by userId when provided', async () => {
     const mockResults = [
       {
-        id: 'user-1-note-1',
-        content: "User's investment notes",
-        userId: 'user-123',
-        tickerId: 'ticker-1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ticker: { id: 'ticker-1', symbol: 'AAPL', userId: 'user-123', createdAt: new Date(), updatedAt: new Date() },
+        id: 'chunk-1',
+        noteId: 'note-1',
+        chunkContent: "User's investment notes",
+        note: {
+          id: 'note-1',
+          content: 'Full content',
+          userId: 'user-123',
+          tickerId: 'ticker-1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          ticker: { id: 'ticker-1', symbol: 'AAPL', userId: 'user-123', createdAt: new Date(), updatedAt: new Date() },
+        },
       },
     ];
-    vi.mocked(prisma.tradingNote.findMany).mockResolvedValue(mockResults);
+    vi.mocked(prisma.noteChunk.findMany).mockResolvedValue(mockResults);
 
     const results = await findRelevantFinance('portfolio', 'user-123');
     expect(results).toHaveLength(1);
-    expect(prisma.tradingNote.findMany).toHaveBeenCalled();
+    expect(prisma.noteChunk.findMany).toHaveBeenCalled();
   });
 
   it('should use custom limit parameter', async () => {
     const mockResults = Array(5).fill({
-      id: 'id',
-      content: 'test',
-      userId: 'user-1',
-      tickerId: 'ticker-1',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ticker: { id: 'ticker-1', symbol: 'TEST', userId: 'user-1', createdAt: new Date(), updatedAt: new Date() },
+      id: 'chunk-1',
+      noteId: 'note-1',
+      chunkContent: 'test chunk',
+      note: {
+        id: 'note-1',
+        content: 'Full content',
+        userId: 'user-1',
+        tickerId: 'ticker-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ticker: { id: 'ticker-1', symbol: 'TEST', userId: 'user-1', createdAt: new Date(), updatedAt: new Date() },
+      },
     });
-    vi.mocked(prisma.tradingNote.findMany).mockResolvedValue(mockResults);
+    vi.mocked(prisma.noteChunk.findMany).mockResolvedValue(mockResults);
 
     await findRelevantFinance('query', undefined, 5);
-    expect(prisma.tradingNote.findMany).toHaveBeenCalled();
+    expect(prisma.noteChunk.findMany).toHaveBeenCalled();
   });
 
-  it('should handle empty query string', async () => {
-    vi.mocked(prisma.tradingNote.findMany).mockResolvedValue([]);
+  it('should handle empty results', async () => {
+    vi.mocked(prisma.noteChunk.findMany).mockResolvedValue([]);
 
     const results = await findRelevantFinance('');
     expect(results).toEqual([]);
   });
 
-  it('should return empty array when no results match', async () => {
-    vi.mocked(prisma.tradingNote.findMany).mockResolvedValue([]);
+  it('should return empty array when no chunks match', async () => {
+    vi.mocked(prisma.noteChunk.findMany).mockResolvedValue([]);
 
     const results = await findRelevantFinance('some obscure query');
     expect(results).toHaveLength(0);
@@ -87,16 +102,21 @@ describe('findRelevantFinance', () => {
   it('should filter by ticker when provided', async () => {
     const mockResults = [
       {
-        id: '1',
-        content: 'NVDA analysis',
-        userId: 'user-1',
-        tickerId: 'ticker-nvda',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ticker: { id: 'ticker-nvda', symbol: 'NVDA', userId: 'user-1', createdAt: new Date(), updatedAt: new Date() },
+        id: 'chunk-1',
+        noteId: 'note-1',
+        chunkContent: 'NVDA analysis',
+        note: {
+          id: 'note-1',
+          content: 'Full content',
+          userId: 'user-1',
+          tickerId: 'ticker-nvda',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          ticker: { id: 'ticker-nvda', symbol: 'NVDA', userId: 'user-1', createdAt: new Date(), updatedAt: new Date() },
+        },
       },
     ];
-    vi.mocked(prisma.tradingNote.findMany).mockResolvedValue(mockResults);
+    vi.mocked(prisma.noteChunk.findMany).mockResolvedValue(mockResults);
 
     const results = await findRelevantFinance('analysis', 'user-1', 3, 'NVDA');
     expect(results).toHaveLength(1);
