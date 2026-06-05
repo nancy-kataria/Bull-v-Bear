@@ -47,7 +47,7 @@ export async function proxy(request: NextRequest) {
 
   // Protection Logic
   const isProtectedPath = 
-    request.nextUrl.pathname.startsWith('/chat') || 
+    request.nextUrl.pathname.startsWith('/analysis-room') || 
     request.nextUrl.pathname.startsWith('/trading-assistant') ||
     request.nextUrl.pathname.startsWith('/dashboard') ||
     request.nextUrl.pathname.startsWith('/ingest');
