@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Scale } from "lucide-react";
+import { useProtected } from "@/lib/use-protected";
 import type { NavProps } from '@/types';
 
 export function Nav({ setShowSignInModal, setShowSignUpModal }: NavProps) {
+  const { isAuthenticated } = useProtected();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -30,19 +35,31 @@ export function Nav({ setShowSignInModal, setShowSignUpModal }: NavProps) {
           </a>
         </nav>
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setShowSignUpModal(true)}
-            className="hidden rounded-md px-3.5 py-2 text-sm font-medium border border-system text-system transition hover:bg-system/10 sm:inline"
-          >
-            Sign up
-          </button>
-          <button 
-            onClick={() => setShowSignInModal(true)}
-            className="group inline-flex items-center gap-1.5 rounded-md bg-system px-3.5 py-2 text-sm font-medium text-system-foreground shadow-[var(--glow-system)] transition hover:brightness-110"
-          >
-            Sign in
-            <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-          </button>
+          {isAuthenticated ? (
+            <Link 
+              href="/dashboard"
+              className="group inline-flex items-center gap-1.5 rounded-md bg-system px-3.5 py-2 text-sm font-medium text-system-foreground shadow-[var(--glow-system)] transition hover:brightness-110"
+            >
+              Dashboard
+              <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+            </Link>
+          ) : (
+            <>
+              <button 
+                onClick={() => setShowSignUpModal(true)}
+                className="hidden rounded-md px-3.5 py-2 text-sm font-medium border border-system text-system transition hover:bg-system/10 sm:inline"
+              >
+                Sign up
+              </button>
+              <button 
+                onClick={() => setShowSignInModal(true)}
+                className="group inline-flex items-center gap-1.5 rounded-md bg-system px-3.5 py-2 text-sm font-medium text-system-foreground shadow-[var(--glow-system)] transition hover:brightness-110"
+              >
+                Sign in
+                <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
