@@ -7,14 +7,15 @@ import {
   Trash2,
   GraduationCap,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import {
-  usePrice,
   formatRelative,
   formatDate,
   type Note,
   type Folder,
 } from "@/lib/mock_notes";
+import { useAlphaVantagePrice } from "@/lib/useAlphaVantagePrice";
 
 interface FolderViewProps {
   folder: Folder;
@@ -31,7 +32,7 @@ export function FolderView({
   onDelete,
   onDeleteFolder,
 }: FolderViewProps) {
-  const { price, change } = usePrice(folder.ticker);
+  const { price, change, loading, error } = useAlphaVantagePrice(folder.ticker);
   const sorted = [...folder.notes].sort((a, b) => b.updatedAt - a.updatedAt);
   const up = change >= 0;
 
@@ -73,20 +74,25 @@ export function FolderView({
               ${folder.ticker}
             </h1>
             <div className="mt-2 flex items-baseline gap-3">
-              <span className="font-mono text-2xl tabular-nums">
-                {price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </span>
-              <span
-                className={[
-                  "font-mono text-sm tabular-nums",
-                  up ? "text-bull" : "text-bear",
-                ].join(" ")}
-              >
-                {up ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                Live
-              </span>
+              {loading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              ) : error ? (
+                <span className="text-sm text-bear">{error}</span>
+              ) : (
+                <>
+                  <span className="font-mono text-2xl tabular-nums">
+                    {price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                  <span
+                    className={[
+                      "font-mono text-sm tabular-nums",
+                      up ? "text-bull" : "text-bear",
+                    ].join(" ")}
+                  >
+                    {up ? "▲" : "▼"} {Math.abs(change).toFixed(2)}%
+                  </span>
+                </>
+              )}
             </div>
           </div>
           <button
