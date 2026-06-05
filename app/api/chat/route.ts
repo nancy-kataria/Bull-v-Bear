@@ -36,12 +36,14 @@ export async function POST(req: Request) {
     if (!user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { messages } = await req.json();
+    const { messages, tickerContext } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
 
     // Extract the ticker
     const tickerMatch = lastMessage.match(/\$([A-Z]{1,5})\b/);
-    const activeTicker = tickerMatch ? tickerMatch[1].toUpperCase() : null;
+    const activeTicker = tickerContext 
+      ? tickerContext.toUpperCase() 
+      : (tickerMatch ? tickerMatch[1].toUpperCase() : null);
 
     // to gather context (Local RAG + Tavily Web Search)
     const researchResult = await generateText({
@@ -115,12 +117,32 @@ export async function POST(req: Request) {
          Original Context: ${context}`,
     });
 
-    const ticker = activeTicker || "GENERAL";
+
+    // Get or create ticker for debate association
+    let tickerId: string | null = null;
+    if (activeTicker) {
+      const tickerRecord = await prisma.ticker.findUnique({
+        where: {
+          userId_symbol: {
+            userId: user.id,
+            symbol: activeTicker,
+          },
+        },
+      });
+      tickerId = tickerRecord?.id || null;
+
+      if (!tickerId) {
+        const newTicker = await prisma.ticker.create({
+          data: { symbol: activeTicker, userId: user.id },
+        });
+        tickerId = newTicker.id;
+      }
+    }
 
     const savedDebate = await prisma.debate.create({
       data: {
         userId: user.id,
-        ticker: ticker,
+        tickerId: tickerId || "", // Will fail validation if null, but that's ok for general debates
         userQuery: lastMessage,
         bullResponse: JSON.stringify(bull.output),
         bearResponse: JSON.stringify(bear.output),
