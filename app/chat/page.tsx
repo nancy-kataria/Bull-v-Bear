@@ -386,7 +386,7 @@ export default function JuryRoomPage() {
               <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-navy-800 border border-neutral-border">
                 <Scale size={28} className="text-neutral-muted" />
               </div>
-              <h3 className="text-lg font-semibold text-neutral-white">The Jury Room</h3>
+              <h3 className="text-lg font-semibold text-neutral-white">The Bull v. Bear Analysis Room</h3>
               <p className="text-sm text-neutral-muted max-w-sm leading-relaxed">
                 Enter an investment question to convene the jury. Bull and Bear analysts will deliberate, and the Judge will deliver a verdict.
               </p>
