@@ -86,7 +86,6 @@ We welcome contributions to Bull-v-Bear! Here's how you can help:
    ```
 
 2. **Make your changes:**
-   - Follow the existing code style
    - Write tests for new features
    - Ensure all tests pass: `npm run test:run`
    - Check linting: `npm run lint`
