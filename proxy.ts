@@ -24,7 +24,7 @@ export async function proxy(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           // Syncing cookies to the request so the rest of the app sees them
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           
           // Create a new response to carry the new headers
           response = NextResponse.next({

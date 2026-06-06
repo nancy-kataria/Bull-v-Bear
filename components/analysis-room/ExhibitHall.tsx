@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import {
   FileText,
   Globe,
@@ -35,64 +32,6 @@ const sourceConfig = {
 };
 
 export default function ExhibitHall({ sources }: Props) {
-  const [noteText, setNoteText] = useState("");
-  const [ingestLoading, setIngestLoading] = useState(false);
-  const [ingestStatus, setIngestStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [ingestMessage, setIngestMessage] = useState("");
-
-  const handleIngestNote = async () => {
-    if (!noteText.trim()) return;
-
-    setIngestLoading(true);
-    setIngestStatus("loading");
-    setIngestMessage("");
-
-    try {
-      const response = await fetch("/api/ingest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: noteText,
-          metadata: {
-            source: "exhibit-hall",
-            type: "note",
-            createdAt: new Date().toISOString(),
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setIngestStatus("error");
-          setIngestMessage("Unauthorized. Please sign in.");
-          setIngestLoading(false);
-          return;
-        }
-        throw new Error("Failed to ingest note");
-      }
-
-      setIngestStatus("success");
-      setIngestMessage("Note ingested successfully");
-      setNoteText("");
-
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setIngestStatus("idle");
-        setIngestMessage("");
-      }, 3000);
-    } catch (error) {
-      setIngestStatus("error");
-      setIngestMessage(
-        error instanceof Error ? error.message : "Failed to ingest note",
-      );
-    } finally {
-      setIngestLoading(false);
-    }
-  };
 
   return (
     <div className="card-base h-full flex flex-col">

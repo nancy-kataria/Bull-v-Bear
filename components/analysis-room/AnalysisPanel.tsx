@@ -1,14 +1,9 @@
 import { Scale, Gavel } from 'lucide-react';
 import BullBearPodium from '@/components/analysis-room/BullBearPodium';
 import DisplayVerdictCard from '@/components/DisplayVerdictCard';
-import type { Phase, VerdictData } from '@/types';
+import { AnalysisPanelProps } from '@/types';
 
-interface AnalysisPanelProps {
-  phase: Phase;
-  showBull: boolean;
-  showBear: boolean;
-  verdict: VerdictData | null;
-}
+
 
 export function AnalysisPanel({ phase, showBull, showBear, verdict }: AnalysisPanelProps) {
   return (

@@ -184,3 +184,22 @@ export interface NoteChunk {
   note?: TradingNote;
   chunkContent: string;
 }
+
+export type Note = {
+  id: string;
+  body: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export interface Folder {
+  ticker: string;
+  notes: (Note & { dbId?: string })[];
+}
+
+export interface AnalysisPanelProps {
+  phase: Phase;
+  showBull: boolean;
+  showBear: boolean;
+  verdict: VerdictData | null;
+}

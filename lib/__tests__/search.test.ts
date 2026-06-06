@@ -2,6 +2,12 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { findRelevantFinance } from '@/lib/search';
 import { prisma } from '@/prisma/prisma';
 
+type NoteChunkResult = {
+  id: string;
+  noteId: string;
+  chunkContent: string;
+};
+
 //  Mock prisma module
 vi.mock('@/prisma/prisma', () => {
   return {
@@ -26,15 +32,13 @@ describe('findRelevantFinance', () => {
     const fakeDbResults = [
       {
         id: 'chunk-1',
+        noteId: 'note-1',
         chunkContent: 'Apple is hitting record high stock prices.',
-        note: {
-          ticker: { symbol: 'AAPL' }
-        }
       }
     ];
 
     // exactly what to return when called
-    mockedPrismaFindMany.mockResolvedValue(fakeDbResults as any);
+    mockedPrismaFindMany.mockResolvedValue(fakeDbResults as NoteChunkResult[]);
 
     const output = await findRelevantFinance('Apple', 'user-123', 1, 'AAPL');
 

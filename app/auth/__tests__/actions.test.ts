@@ -7,6 +7,23 @@ import {
 } from "@/app/auth/actions";
 import { prisma } from "@/prisma/prisma";
 
+type AuthResponse<T> = {
+  data: T | null;
+  error: { message: string } | null;
+};
+
+type OAuthResponse = {
+  url: string | null;
+};
+
+type SignUpData = {
+  user: { id: string; email: string } | null;
+};
+
+type SignInData = {
+  user: { id: string; email: string } | null;
+};
+
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((url: string) => {
     throw new Error(`Redirected to ${url}`);
@@ -52,7 +69,7 @@ describe("Authentication Server Actions", () => {
       vi.mocked(mockSupabaseClient.auth.signInWithOAuth).mockResolvedValue({
         data: { url: "https://google.com/oauth" },
         error: null,
-      } as any);
+      } satisfies AuthResponse<OAuthResponse>);
 
       // Since redirect throws an error, assert that it throws our custom redirect string
       await expect(signInWithGoogle()).rejects.toThrow(
@@ -64,7 +81,7 @@ describe("Authentication Server Actions", () => {
       vi.mocked(mockSupabaseClient.auth.signInWithOAuth).mockResolvedValue({
         data: { url: null },
         error: { message: "OAuth failed" },
-      } as any);
+      } satisfies AuthResponse<OAuthResponse>);
 
       const consoleSpy = vi
         .spyOn(console, "error")
@@ -83,7 +100,7 @@ describe("Authentication Server Actions", () => {
       vi.mocked(mockSupabaseClient.auth.signUp).mockResolvedValue({
         data: { user: null },
         error: { message: "Weak password" },
-      } as any);
+      } satisfies AuthResponse<SignUpData>);
 
       const result = await signUpWithEmail("test@test.com", "password123");
       expect(result).toEqual({ success: false, error: "Weak password" });
@@ -93,10 +110,10 @@ describe("Authentication Server Actions", () => {
       vi.mocked(mockSupabaseClient.auth.signUp).mockResolvedValue({
         data: { user: { id: "new-uid", email: "test@test.com" } },
         error: null,
-      } as any);
+      } satisfies AuthResponse<SignUpData>);
 
       // Simulate user not existing in Prisma yet
-      vi.mocked(mockedPrismaUser.findUnique).mockResolvedValue(null);
+      vi.mocked(mockedPrismaUser.findUnique).mockResolvedValue(null as never);
 
       const result = await signUpWithEmail("test@test.com", "password123");
 
@@ -113,13 +130,13 @@ describe("Authentication Server Actions", () => {
       vi.mocked(mockSupabaseClient.auth.signUp).mockResolvedValue({
         data: { user: { id: "existing-uid", email: "test@test.com" } },
         error: null,
-      } as any);
+      } satisfies AuthResponse<SignUpData>);
 
       // Simulate user already existing
       vi.mocked(mockedPrismaUser.findUnique).mockResolvedValue({
         id: "existing-uid",
         email: "test@test.com",
-      } as any);
+      } as never);
 
       await signUpWithEmail("test@test.com", "password123");
 
@@ -133,7 +150,7 @@ describe("Authentication Server Actions", () => {
       vi.mocked(mockSupabaseClient.auth.signInWithPassword).mockResolvedValue({
         data: { user: null },
         error: { message: "Invalid credentials" },
-      } as any);
+      } satisfies AuthResponse<SignInData>);
 
       const result = await signInWithEmail("wrong@test.com", "badpass");
       expect(result).toEqual({ success: false, error: "Invalid credentials" });
@@ -143,7 +160,7 @@ describe("Authentication Server Actions", () => {
       vi.mocked(mockSupabaseClient.auth.signInWithPassword).mockResolvedValue({
         data: { user: { id: "user-456", email: "right@test.com" } },
         error: null,
-      } as any);
+      } satisfies AuthResponse<SignInData>);
       vi.mocked(mockedPrismaUser.findUnique).mockResolvedValue(null);
 
       const result = await signInWithEmail("right@test.com", "goodpass");

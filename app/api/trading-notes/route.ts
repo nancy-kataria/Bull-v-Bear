@@ -69,7 +69,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const tickerId = searchParams.get("tickerId");
 
-    const where: any = { userId: user.id };
+    const where: { userId: string; tickerId?: string } = { userId: user.id };
     if (tickerId) {
       where.tickerId = tickerId;
     }

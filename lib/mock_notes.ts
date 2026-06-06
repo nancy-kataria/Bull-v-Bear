@@ -1,11 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-
-export type Note = {
-  id: string;
-  body: string;
-  createdAt: number;
-  updatedAt: number;
-};
+import type { Note } from "@/types";
 
 export type Folder = {
   ticker: string;

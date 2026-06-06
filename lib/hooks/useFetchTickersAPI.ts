@@ -1,20 +1,21 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { Ticker } from '@/types';
+import { TradingNote } from '@/types';
 
 export interface FetchTickersResponse extends Ticker {
-  notes?: any[];
+  notes?: TradingNote[];
 }
 
 export function useFetchTickersAPI() {
   const [tickers, setTickers] = useState<FetchTickersResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTickers = useCallback(async () => {
+  const fetchTickers = useCallback(async (signal?: AbortSignal) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/tickers');
+      const response = await fetch('/api/tickers', { signal });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -24,18 +25,15 @@ export function useFetchTickersAPI() {
       const data = await response.json();
       setTickers(data);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to fetch tickers';
-      setError(errorMessage);
-      console.error('Error fetching tickers:', err);
+      if (err instanceof Error && err.name !== 'AbortError') {
+        const errorMessage = err.message || 'Failed to fetch tickers';
+        setError(errorMessage);
+        console.error('Error fetching tickers:', err);
+      }
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchTickers();
-  }, [fetchTickers]);
-
-  return { tickers, isLoading, error, refetch: fetchTickers };
+  return { tickers, isLoading, error, fetchTickers };
 }

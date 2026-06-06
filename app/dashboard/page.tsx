@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState, useCallback } from "react";
-import type { Note } from "@/lib/mock_notes";
+import type { Note } from "@/types";
+import {Folder} from "@/types";
 import { NoteEditorModal } from "@/components/dashboard/NoteEditorModal";
 import { useProtected } from "@/lib/use-protected";
 import { Header } from "@/components/dashboard/Header";
@@ -18,14 +19,9 @@ import {
 } from "@/lib/hooks";
 import type { TradingNote } from "@/types";
 
-interface Folder {
-  ticker: string;
-  notes: (Note & { dbId?: string })[];
-}
-
 export default function TradingNotesPage() {
   const { isLoading: authLoading, isAuthenticated } = useProtected();
-  const { tickers, isLoading: tickersLoading, refetch: refetchTickers } =
+  const { tickers, isLoading: tickersLoading, fetchTickers } =
     useFetchTickersAPI();
   const { createNote, updateNote: updateNoteAPI, deleteNote: deleteNoteAPI } =
     useTradingNotesAPI();
@@ -93,7 +89,7 @@ export default function TradingNotesPage() {
         await ingestNote(body, folder.ticker, noteId);
 
         // Refetch data to sync with database
-        await refetchTickers();
+        await fetchTickers();
 
         setEditor({ open: false });
       } catch (error) {
@@ -103,7 +99,7 @@ export default function TradingNotesPage() {
         setIsSaving(false);
       }
     },
-    [editor, folder, createNote, updateNoteAPI, ingestNote, refetchTickers],
+    [editor, folder, createNote, updateNoteAPI, ingestNote, fetchTickers],
   );
 
   const handleDeleteNote = useCallback(
@@ -116,13 +112,13 @@ export default function TradingNotesPage() {
       try {
         await deleteNoteAPI(dbId);
         // Refetch to sync with database
-        await refetchTickers();
+        await fetchTickers();
       } catch (error) {
         console.error("Failed to delete note:", error);
         alert("Failed to delete note. Please try again.");
       }
     },
-    [deleteNoteAPI, refetchTickers],
+    [deleteNoteAPI, fetchTickers],
   );
 
   const handleDeleteFolder = useCallback(
@@ -130,14 +126,14 @@ export default function TradingNotesPage() {
       try {
         await deleteTicker(ticker);
         // Refetch to sync with database
-        await refetchTickers();
+        await fetchTickers();
         setUserSelectedTicker(null);
       } catch (error) {
         console.error("Failed to delete ticker:", error);
         alert("Failed to delete ticker. Please try again.");
       }
     },
-    [deleteTicker, refetchTickers],
+    [deleteTicker, fetchTickers],
   );
 
   const handleAddTicker = useCallback(async () => {
@@ -150,7 +146,7 @@ export default function TradingNotesPage() {
       await createTicker(newTicker);
 
       // Refetch to sync with database
-      await refetchTickers();
+      await fetchTickers();
       setUserSelectedTicker(newTicker);
       setTickerInput("");
       setShowTickerInput(false);
@@ -160,7 +156,7 @@ export default function TradingNotesPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [tickerInput, createTicker, refetchTickers]);
+  }, [tickerInput, createTicker, fetchTickers]);
 
   if (authLoading || tickersLoading) {
     return (
