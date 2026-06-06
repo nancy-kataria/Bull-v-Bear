@@ -28,6 +28,10 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      # Generate Prisma Client BEFORE compiling/linting
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       # Code Quality Checks (Fails pipeline if code is messy or broken)
       - name: Run Linter & Type Check
         run: |
