@@ -46,9 +46,10 @@ jobs:
           version: 'latest'
 
       - name: Verify Supabase DB Schema
-        run: supabase db lint --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: supabase db lint --linked
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
 
       # Install Vercel CLI and pull remote configuration
       - name: Install Vercel CLI
