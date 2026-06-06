@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Scale, RotateCcw, LogOut } from 'lucide-react';
+import Image from 'next/image';
+import { RotateCcw, LogOut } from 'lucide-react';
 import { signOut } from '@/app/auth/actions';
 import type { Phase } from '@/types';
 
@@ -21,8 +22,18 @@ export function Header({ phase, onReset }: HeaderProps) {
         </button>
         <div className="w-px h-5 bg-neutral-border" />
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-electric-dim border border-electric/30">
-            <Scale size={13} className="text-electric" />
+          <div className="relative flex h-10 w-10 items-center justify-center">
+            <Image 
+              src="/Green-Bull.png" 
+              alt="Bull v. Bear" 
+              width={40} 
+              height={40} 
+              className="h-full w-full"
+            />
+            <span
+              className="absolute -inset-px rounded-lg"
+              style={{ boxShadow: "var(--glow-system)", opacity: 0.4 }}
+            />
           </div>
           <Link href="/" className="font-mono font-bold text-sm text-neutral-white hover:text-electric transition-colors">
             Bull v. Bear

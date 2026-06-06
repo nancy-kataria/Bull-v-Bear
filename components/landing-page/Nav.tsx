@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Scale } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import { useProtected } from "@/lib/use-protected";
 import type { NavProps } from '@/types';
 
@@ -12,8 +13,14 @@ export function Nav({ setShowSignInModal, setShowSignUpModal }: NavProps) {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-system/15 ring-1 ring-system/40">
-            <Scale className="h-4 w-4 text-system" />
+          <div className="relative flex h-10 w-10 items-center justify-center">
+            <Image 
+              src="/Green-Bull.png" 
+              alt="Bull v. Bear" 
+              width={40} 
+              height={40} 
+              className="h-full w-full"
+            />
             <span
               className="absolute -inset-px rounded-lg"
               style={{ boxShadow: "var(--glow-system)", opacity: 0.4 }}
@@ -21,9 +28,6 @@ export function Nav({ setShowSignInModal, setShowSignUpModal }: NavProps) {
           </div>
           <span className="font-mono text-sm font-semibold tracking-wide">
             Bull v. Bear
-          </span>
-          <span className="ml-1 hidden rounded-md border border-border bg-surface px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground sm:inline">
-            v0.1 · Beta
           </span>
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
