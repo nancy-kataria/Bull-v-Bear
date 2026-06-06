@@ -6,6 +6,9 @@ type NoteChunkResult = {
   id: string;
   noteId: string;
   chunkContent: string;
+  note: {
+    ticker: { symbol: string };
+  };
 };
 
 //  Mock prisma module
@@ -34,6 +37,9 @@ describe('findRelevantFinance', () => {
         id: 'chunk-1',
         noteId: 'note-1',
         chunkContent: 'Apple is hitting record high stock prices.',
+        note: {
+          ticker: { symbol: 'AAPL' }
+        }
       }
     ];
 
