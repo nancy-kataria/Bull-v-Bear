@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 export type ChatMessage = {
   id: string;
@@ -61,7 +61,37 @@ export function useThreads() {
     return [t];
   });
 
-  const [ready] = useState(true);
+  const [ready, setReady] = useState(false);
+
+  // Fetch threads from API on mount
+  useEffect(() => {
+    const fetchThreads = async () => {
+      try {
+        const response = await fetch("/api/assistant");
+        if (response.ok) {
+          const chats = await response.json();
+          if (chats && Array.isArray(chats) && chats.length > 0) {
+            // Convert DB format to Thread format
+            const threadsFromDB = chats.map((chat) => ({
+              id: chat.id,
+              title: chat.title,
+              updatedAt: new Date(chat.updatedAt).getTime(),
+              messages: Array.isArray(chat.messages) ? chat.messages : [],
+            }));
+            setThreads(threadsFromDB);
+            writeStorage(threadsFromDB);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch threads from API:", error);
+        // Fall back to localStorage
+      } finally {
+        setReady(true);
+      }
+    };
+
+    fetchThreads();
+  }, []);
 
   const update = useCallback((updater: (prev: Thread[]) => Thread[]) => {
     setThreads((prev) => {

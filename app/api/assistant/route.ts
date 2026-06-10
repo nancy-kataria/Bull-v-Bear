@@ -6,6 +6,38 @@ import { prisma } from "@/prisma/prisma";
 // Initialize the Google Gen AI client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+export async function GET() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const chats = await prisma.assistantChat.findMany({
+      where: { userId: user.id },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        updatedAt: true,
+        messages: true,
+      },
+    });
+
+    return NextResponse.json(chats);
+  } catch (error) {
+    console.error("Fetch Chats Error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch chats" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function POST(req: Request) {
   try {
     // Authenticate user session via Supabase
