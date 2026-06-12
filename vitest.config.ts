@@ -8,6 +8,18 @@ export default defineConfig({
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
     globals: true,
     reporters: 'verbose',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      // Measure the application code we actually author and test.
+      include: ['app/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}'],
+      exclude: [
+        'app/generated/**',
+        '**/*.d.ts',
+        '**/__tests__/**',
+        '**/*.{test,spec}.{ts,tsx}',
+      ],
+    },
   },
   resolve: {
     alias: {
