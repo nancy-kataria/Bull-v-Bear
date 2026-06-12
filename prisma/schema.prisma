@@ -45,10 +45,13 @@ model TradingNote {
 }
 
 model NoteChunk {
-  id            String      @id @default(cuid())
+  id            String                       @id @default(cuid())
   noteId        String
-  note          TradingNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  chunkContent  String      @db.Text
+  note          TradingNote                  @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  chunkContent  String                       @db.Text
+  // pgvector column populated via raw SQL in app/api/ingest/route.ts.
+  // Requires the `vector` extension; dimension matches text-embedding-3-small.
+  embedding     Unsupported("vector(1536)")?
 
   @@index([noteId])
 }
@@ -57,8 +60,8 @@ model Debate {
   id           String   @id @default(cuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id])
-  tickerId     String   
-  ticker       Ticker   @relation(fields: [tickerId], references: [id], onDelete: Cascade)
+  tickerId     String?
+  ticker       Ticker?  @relation(fields: [tickerId], references: [id], onDelete: Cascade)
   userQuery    String
   bullResponse Json     
   bearResponse Json     
