@@ -60,6 +60,7 @@ export async function POST(req: Request) {
             const results = await findRelevantFinance(
               query,
               user.id,
+              3,
               activeTicker,
             );
             return JSON.stringify(results);
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
       generateText({
         model: openai("gpt-4o-mini"),
         output: Output.object({ schema: AnalystSchema }),
-        system: `You are a BULL analyst. Argue why this is a SELL/AVOID.
+        system: `You are a BEAR analyst. Argue why this is a SELL/AVOID.
              For every point, you MUST provide the 'sourceIndex' that matches the source list provided.`,
         prompt: `Sources:\n${indexedSourcesForAI}\n\nQuestion: ${lastMessage}`,
       }),
@@ -142,11 +143,13 @@ export async function POST(req: Request) {
     const savedDebate = await prisma.debate.create({
       data: {
         userId: user.id,
-        tickerId: tickerId || "", // Will fail validation if null, but that's ok for general debates
+        tickerId, // null for general (tickerless) debates
         userQuery: lastMessage,
-        bullResponse: JSON.stringify(bull.output),
-        bearResponse: JSON.stringify(bear.output),
-        judgeVerdict: JSON.stringify(verdict.output),
+        // Store as native JSON (the columns are JSONB) — do not pre-stringify,
+        // or the values get double-encoded as JSON strings inside JSONB.
+        bullResponse: bull.output,
+        bearResponse: bear.output,
+        judgeVerdict: verdict.output,
       },
     });
 

@@ -1,99 +1,65 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { findRelevantFinance } from '@/lib/search';
 import { prisma } from '@/prisma/prisma';
+import { embed } from 'ai';
 
-type NoteChunkResult = {
-  id: string;
-  noteId: string;
-  chunkContent: string;
-  note: {
-    ticker: { symbol: string };
-  };
-};
-
-//  Mock prisma module
+// Mock prisma module — search now runs a raw pgvector query.
 vi.mock('@/prisma/prisma', () => {
   return {
     prisma: {
-      noteChunk: {
-        findMany: vi.fn(),
-      },
+      $queryRaw: vi.fn(),
     },
   };
 });
 
-//cleanly overriding types for TypeScript
-const mockedPrismaFindMany = vi.mocked(prisma.noteChunk.findMany);
+// Mock the embedding model + the `embed` helper so no network call is made.
+vi.mock('@ai-sdk/openai', () => ({
+  openai: { embedding: vi.fn(() => 'mock-embedding-model') },
+}));
+
+vi.mock('ai', () => ({
+  embed: vi.fn(),
+}));
+
+const mockedQueryRaw = vi.mocked(prisma.$queryRaw);
+const mockedEmbed = vi.mocked(embed);
 
 describe('findRelevantFinance', () => {
-  
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedEmbed.mockResolvedValue({ embedding: [0.1, 0.2, 0.3] } as never);
   });
 
-  test('should successfully fetch and map raw Prisma data correctly', async () => {
-    const fakeDbResults = [
+  test('embeds the query and maps raw rows into the result shape', async () => {
+    mockedQueryRaw.mockResolvedValue([
       {
         id: 'chunk-1',
-        noteId: 'note-1',
         chunkContent: 'Apple is hitting record high stock prices.',
-        note: {
-          ticker: { symbol: 'AAPL' }
-        }
-      }
-    ];
-
-    // exactly what to return when called
-    mockedPrismaFindMany.mockResolvedValue(fakeDbResults as NoteChunkResult[]);
+        symbol: 'AAPL',
+      },
+    ] as never);
 
     const output = await findRelevantFinance('Apple', 'user-123', 1, 'AAPL');
 
+    expect(mockedEmbed).toHaveBeenCalledTimes(1);
+    expect(mockedQueryRaw).toHaveBeenCalledTimes(1);
     expect(output).toEqual([
       {
         id: 'chunk-1',
         content: 'Apple is hitting record high stock prices.',
         metadata: { ticker: 'AAPL' },
-        ticker: 'AAPL'
-      }
+        ticker: 'AAPL',
+      },
     ]);
-
-    // Verify Prisma was called with the correct parameters
-    expect(mockedPrismaFindMany).toHaveBeenCalledWith({
-      where: {
-        note: {
-          AND: [
-            { userId: 'user-123' },
-            { ticker: { symbol: 'AAPL' } }
-          ]
-        }
-      },
-      include: {
-        note: {
-          include: { ticker: true }
-        }
-      },
-      take: 1
-    });
   });
 
-  test('should handle optional fields when ticker and userId are omitted', async () => {
-    mockedPrismaFindMany.mockResolvedValue([]);
+  test('handles optional fields when ticker and userId are omitted', async () => {
+    mockedQueryRaw.mockResolvedValue([] as never);
 
-    // Call without optional items or limits
-    await findRelevantFinance('Query without filters');
+    const output = await findRelevantFinance('Query without filters');
 
-    expect(mockedPrismaFindMany).toHaveBeenCalledWith({
-      where: {
-        note: {
-          AND: [{}, {}]
-        }
-      },
-      include: {
-        note: {
-          include: { ticker: true }
-        }
-      },
-      take: 3
-    });
+    expect(mockedEmbed).toHaveBeenCalledTimes(1);
+    expect(mockedQueryRaw).toHaveBeenCalledTimes(1);
+    expect(output).toEqual([]);
   });
 });
