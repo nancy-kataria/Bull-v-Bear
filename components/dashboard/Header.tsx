@@ -25,12 +25,20 @@ export function Header() {
             Bull v. Bear
           </span>
         </Link>
-        <button
-          onClick={() => signOut()}
-          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          <LogOut className="h-3.5 w-3.5" /> Sign Out
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/analysis-room"
+            className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium border border-system text-system transition hover:bg-system/10"
+          >
+            Bull v. Bear Analysis
+          </Link>
+          <button
+            onClick={() => signOut()}
+            className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sign Out
+          </button>
+        </div>
       </div>
     </header>
   );
