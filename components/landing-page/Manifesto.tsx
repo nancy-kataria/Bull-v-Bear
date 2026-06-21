@@ -26,13 +26,6 @@ export function Manifesto({ setShowSignUpModal }: ManifestoProps) {
           evidence — auditable, citable, defensible.
         </p>
 
-        <div className="mt-10 inline-flex items-center gap-3 rounded-full border border-border bg-surface/60 px-5 py-2 backdrop-blur">
-          <Sparkles className="h-4 w-4 text-system" />
-          <span className="text-sm text-muted-foreground">
-            Now in private beta · invitations rolling weekly
-          </span>
-        </div>
-
         <div className="mt-8 flex justify-center">
           <button 
             onClick={() => setShowSignUpModal(true)}
