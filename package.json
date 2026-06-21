@@ -11,9 +11,11 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "seed:bench": "tsx scripts/seed-bench.ts",
     "bench:retrieval": "tsx scripts/bench-retrieval.ts",
     "bench:parallel": "tsx scripts/bench-parallel.ts",
-    "bench": "npm run bench:retrieval && npm run bench:parallel"
+    "bench:pipeline": "tsx scripts/bench-pipeline.ts",
+    "bench": "npm run bench:retrieval && npm run bench:parallel && npm run bench:pipeline"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.47",
