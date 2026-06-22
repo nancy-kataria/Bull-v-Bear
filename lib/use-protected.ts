@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getSession } from '@/app/auth/get-session'
+import { getUser } from '@/app/auth/get-session'
 
 export function useProtected() {
   const router = useRouter()
@@ -14,9 +14,9 @@ export function useProtected() {
 
     const checkAuth = async () => {
       try {
-        const session = await getSession()
+        const user = await getUser()
         if (isMounted) {
-          if (!session) {
+          if (!user) {
             router.replace('/')
           } else {
             setIsAuthenticated(true)
