@@ -8,52 +8,73 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  debates   Debate[]
-  tickers   Ticker[]
+  id             String          @id @default(uuid())
+  email          String          @unique
+  name           String?
+  debates        Debate[]
+  tickers        Ticker[]
   assistantChats AssistantChat[]
-  createdAt DateTime @default(now())
+  createdAt      DateTime        @default(now())
 }
 
 model Ticker {
-  id        String        @id @default(cuid())
-  symbol    String        @db.VarChar(10)
+  id        String           @id @default(cuid())
+  symbol    String           @db.VarChar(10)
   userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notes     TradingNote[] 
-  debates   Debate[]      
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes     TradingNote[]
+  documents TickerDocument[]
+  debates   Debate[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
-  @@unique([userId, symbol]) 
+  @@unique([userId, symbol])
   @@index([userId])
 }
 
 model TradingNote {
   id        String      @id @default(cuid())
-  userId    String   
-  tickerId  String   
+  userId    String
+  tickerId  String
   ticker    Ticker      @relation(fields: [tickerId], references: [id], onDelete: Cascade)
   content   String      @db.Text
-  chunks    NoteChunk[] 
+  chunks    NoteChunk[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
-  @@index([userId, tickerId]) 
+  @@index([userId, tickerId])
 }
 
 model NoteChunk {
-  id            String                       @id @default(cuid())
-  noteId        String
-  note          TradingNote                  @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  chunkContent  String                       @db.Text
+  id           String                       @id @default(cuid())
+  // A chunk belongs to either a TradingNote or a TickerDocument.
+  noteId       String?
+  note         TradingNote?                 @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  documentId   String?
+  document     TickerDocument?              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkContent String                       @db.Text
   // pgvector column populated via raw SQL in app/api/ingest/route.ts.
   // Requires the `vector` extension; dimension matches text-embedding-3-small.
-  embedding     Unsupported("vector(1536)")?
+  embedding    Unsupported("vector(1536)")?
 
   @@index([noteId])
+  @@index([documentId])
+}
+
+model TickerDocument {
+  id        String      @id @default(cuid())
+  userId    String
+  tickerId  String
+  ticker    Ticker      @relation(fields: [tickerId], references: [id], onDelete: Cascade)
+  fileName  String // E.g., "Q1_2026_Earnings.pdf"
+  fileUrl   String // The public Supabase Storage bucket link
+  fileType  String // E.g., "application/pdf"
+  fullText  String      @db.Text // The raw extracted text string for viewing inside your tab reader
+  chunks    NoteChunk[] // Document files break down into chunks for RAG search
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId, tickerId])
 }
 
 model Debate {
@@ -63,9 +84,9 @@ model Debate {
   tickerId     String?
   ticker       Ticker?  @relation(fields: [tickerId], references: [id], onDelete: Cascade)
   userQuery    String
-  bullResponse Json     
-  bearResponse Json     
-  judgeVerdict Json     
+  bullResponse Json
+  bearResponse Json
+  judgeVerdict Json
   createdAt    DateTime @default(now())
 
   @@index([userId, tickerId])
@@ -75,8 +96,8 @@ model AssistantChat {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String   
-  messages  Json     
+  title     String
+  messages  Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
