@@ -4,9 +4,9 @@ import { useEffect, useMemo } from "react";
 import { useRouter, usePathname, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { MessageSquarePlus, Trash2, MessageSquare, LogOut } from "lucide-react";
-import { useThreads } from "@/lib/chat_store";
+import { useThreads } from "@/hooks/chat_store";
 import Link from "next/link";
-import { useProtected } from "@/lib/use-protected";
+import { useProtected } from "@/hooks/use-protected";
 import { signOut } from "@/app/auth/actions";
 import { Header } from "@/components/Header";
 

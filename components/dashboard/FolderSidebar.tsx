@@ -1,10 +1,7 @@
 import { motion } from "framer-motion";
 import { FolderOpen, Plus, FileText } from "lucide-react";
-import {
-  lastEdited,
-  formatRelative,
-  type Folder,
-} from "@/lib/trading_notes";
+import { lastEdited, formatRelative } from "@/lib/format";
+import type { Folder } from "@/types";
 
 interface FolderSidebarProps {
   folders: Folder[];

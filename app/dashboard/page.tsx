@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { Note, Doc, DocType } from "@/types";
 import { Folder } from "@/types";
 import { NoteEditorModal } from "@/components/dashboard/NoteEditorModal";
-import { useProtected } from "@/lib/use-protected";
+import { useProtected } from "@/hooks/use-protected";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
@@ -24,7 +24,7 @@ import {
   useDeleteNote,
   useUploadDocument,
   useDeleteDocument,
-} from "@/lib/queries";
+} from "@/hooks/queries";
 
 function mapDocType(fileType: string): DocType {
   return fileType.includes("pdf") ? "pdf" : "docx";

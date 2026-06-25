@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { useProtected } from "@/lib/use-protected";
+import { useProtected } from "@/hooks/use-protected";
 interface NavProps {
   setShowSignInModal: (value: boolean) => void;
   setShowSignUpModal: (value: boolean) => void;

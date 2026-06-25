@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { useThreads, type ChatMessage } from "@/lib/chat_store";
+import { useThreads, type ChatMessage } from "@/hooks/chat_store";
 import { DisclaimerBanner } from "@/components/trading-assistant/DisclaimerBanner";
 import { MessageList } from "@/components/trading-assistant/MessageList";
 import { MessageComposer } from "@/components/trading-assistant/MessageComposer";

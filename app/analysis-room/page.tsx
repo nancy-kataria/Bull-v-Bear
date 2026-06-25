@@ -8,8 +8,9 @@ import { InputPanel } from '@/components/analysis-room/InputPanel';
 import { AnalysisPanel } from '@/components/analysis-room/AnalysisPanel';
 import ExhibitHall from '@/components/analysis-room/ExhibitHall';
 import { Footer } from '@/components/Footer';
-import { useProtected } from '@/lib/use-protected';
-import type { Argument, ChatAnalystPoint, ChatApiResponse, Phase, ProcessingStep, Source, VerdictData } from '@/types';
+import { useProtected } from '@/hooks/use-protected';
+import { buildVerdictData } from '@/lib/analysis/verdict';
+import type { ChatApiResponse, Phase, ProcessingStep, Source, VerdictData } from '@/types';
 
 const STEPS_SEQUENCE: { delay: number; id: string; label: string }[] = [
   { delay: 400, id: 'p1', label: 'Summoning Analysts...' },
@@ -18,39 +19,6 @@ const STEPS_SEQUENCE: { delay: number; id: string; label: string }[] = [
   { delay: 3800, id: 'p4', label: 'Staging Deliberation...' },
   { delay: 5200, id: 'p5', label: "Rendering Judge's Verdict..." },
 ];
-
-const extractTicker = (query: string) => query.match(/\$([A-Z]{1,5})\b/)?.[1] ?? 'NVDA';
-
-const buildArguments = (
-  analystData: { points: ChatAnalystPoint[] }
-): Argument[] => {
-  return analystData.points.slice(0, 4).map((pt, index) => ({
-    point: pt.content,
-    weight: index === 0 ? 'strong' : index === 1 ? 'moderate' : 'weak',
-    riskTag: pt.tag,
-    sourceIndex: pt.sourceIndex 
-  }));
-};
-
-const buildVerdictData = (
-  question: string,
-  apiResponse: ChatApiResponse,
-  sources: Source[],
-  tickerFromParams?: string | null,
-): VerdictData => {
-  const ticker = tickerFromParams || extractTicker(question);
-
-  return {
-    ticker,
-    verdict: apiResponse.decision.verdict,
-    confidence: apiResponse.decision.confidence,
-    summary: apiResponse.decision.reasoning,
-    bullArguments: buildArguments(apiResponse.bull),
-    bearArguments: buildArguments(apiResponse.bear),
-    riskTags: apiResponse.decision.keyRisks,
-    sources,
-  };
-};
 
 export default function JuryRoomPage() {
   return (

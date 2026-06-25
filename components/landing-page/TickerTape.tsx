@@ -1,4 +1,4 @@
-import { useMovers } from "@/lib/queries";
+import { useMovers } from "@/hooks/queries";
 
 export function TickerTape() {
   const { data, isLoading } = useMovers();

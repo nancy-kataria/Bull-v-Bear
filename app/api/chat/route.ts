@@ -5,74 +5,7 @@ import { tavilySearch } from "@tavily/ai-sdk";
 import { findRelevantFinance } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/prisma/prisma";
-import type { Source } from "@/types";
-
-const SNIPPET_LEN = 220;
-
-function hostname(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return "web";
-  }
-}
-
-function buildWebSources(
-  steps: { toolResults: { output?: unknown }[] }[],
-): Source[] {
-  const sources: Source[] = [];
-  for (const step of steps) {
-    for (const tr of step.toolResults) {
-      const out = tr.output;
-      if (
-        !out ||
-        typeof out !== "object" ||
-        !Array.isArray((out as { results?: unknown }).results)
-      ) {
-        continue;
-      }
-      const results = (out as {
-        results: {
-          title?: string;
-          url?: string;
-          content?: string;
-          publishedDate?: string;
-        }[];
-      }).results;
-      for (const r of results) {
-        if (!r?.url) continue;
-        sources.push({
-          id: `web-${sources.length}`,
-          type: "web",
-          title: r.title || r.url,
-          domain: hostname(r.url),
-          url: r.url,
-          snippet: (r.content || "").slice(0, SNIPPET_LEN),
-          date: (r.publishedDate || "").slice(0, 10),
-        });
-      }
-    }
-  }
-  return sources;
-}
-
-/** The user's retrieved note/document chunks → internal sources (snippets, no URL). */
-function buildInternalSources(
-  results: { id: string; content: string; ticker: string }[],
-  activeTicker: string | null,
-): Source[] {
-  return results
-    .filter((r) => r.content)
-    .map((r, i) => ({
-      id: r.id || `note-${i}`,
-      type: "note" as const,
-      title: `${(r.ticker || activeTicker || "Your").toUpperCase()} — from your library`,
-      domain: "Your notes & documents",
-      url: "",
-      snippet: r.content.slice(0, SNIPPET_LEN),
-      date: "",
-    }));
-}
+import { buildWebSources, buildInternalSources } from "@/lib/chat/sources";
 
 const AnalystSchema = z.object({
   points: z.array(
@@ -113,8 +46,6 @@ export async function POST(req: Request) {
       ? tickerContext.toUpperCase() 
       : (tickerMatch ? tickerMatch[1].toUpperCase() : null);
 
-    // Deterministic local RAG: always retrieve the user's relevant notes/documents
-    // for this ticker, rather than leaving it to the model to decide to call a tool.
     const localResults = await findRelevantFinance(
       lastMessage,
       user.id,
@@ -122,7 +53,6 @@ export async function POST(req: Request) {
       activeTicker,
     );
 
-    // Web research via the model (Tavily) for fresh external context.
     const researchResult = await generateText({
       model: openai("gpt-4o"),
       system:
@@ -136,13 +66,11 @@ export async function POST(req: Request) {
       },
     });
 
-    // Internal sources first (the user's own data), then web — one ordered array
-    // so the sourceIndex the analysts cite lines up with what the UI renders.
     const internalSources = buildInternalSources(localResults, activeTicker);
     const webSources = buildWebSources(researchResult.steps);
     const sources = [...internalSources, ...webSources];
 
-    // Feed both the user's data and web findings into the debate context.
+    
     const localContext = localResults
       .map((r, i) => `[Your note/doc ${i}] (${r.ticker}): ${r.content}`)
       .join("\n\n");
@@ -217,8 +145,6 @@ export async function POST(req: Request) {
         userId: user.id,
         tickerId, // null for general (tickerless) debates
         userQuery: lastMessage,
-        // Store as native JSON (the columns are JSONB) — do not pre-stringify,
-        // or the values get double-encoded as JSON strings inside JSONB.
         bullResponse: bull.output,
         bearResponse: bear.output,
         judgeVerdict: verdict.output,
@@ -226,7 +152,7 @@ export async function POST(req: Request) {
     });
 
     return Response.json({
-      id: savedDebate.id, // Return the ID so the frontend can reference it
+      id: savedDebate.id,
       bull: bull.output,
       bear: bear.output,
       decision: verdict.output,

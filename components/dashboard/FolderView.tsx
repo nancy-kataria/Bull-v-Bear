@@ -12,9 +12,9 @@ import {
   FilePlus2,
   X,
 } from "lucide-react";
-import { formatRelative, formatDate } from "@/lib/trading_notes";
+import { formatRelative, formatDate } from "@/lib/format";
 import type { Note, Folder, Doc } from "@/types";
-import { useQuote } from "@/lib/queries";
+import { useQuote } from "@/hooks/queries";
 import { useRef, useState } from "react";
 
 interface FolderViewProps {

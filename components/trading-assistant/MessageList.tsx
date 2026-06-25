@@ -2,7 +2,7 @@ import { AnimatePresence } from "framer-motion";
 import { MessageRow } from "./MessageRow";
 import { TypingIndicator } from "./TypingIndicator";
 import { EmptyState } from "./EmptyState";
-import type { ChatMessage } from "@/lib/chat_store";
+import type { ChatMessage } from "@/hooks/chat_store";
 
 interface MessageListProps {
   messages: ChatMessage[];

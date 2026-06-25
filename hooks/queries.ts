@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as api from "./api";
+import * as api from "@/lib/api";
 
-/** Centralized query keys so reads and their invalidations always match. */
 export const queryKeys = {
   tickers: ["tickers"] as const,
   documents: (ticker: string) => ["documents", ticker] as const,
@@ -30,7 +29,7 @@ export function useQuote(symbol: string) {
     queryKey: queryKeys.quote(symbol),
     queryFn: () => api.fetchQuote(symbol),
     enabled: !!symbol,
-    retry: false, // don't hammer a rate-limited / invalid symbol
+    retry: false,
   });
 
 
@@ -47,7 +46,7 @@ export function useMovers() {
   return useQuery({
     queryKey: queryKeys.movers,
     queryFn: () => api.fetchMovers(),
-    staleTime: 10 * 60 * 1000, // movers change slowly; cache longer
+    staleTime: 10 * 60 * 1000, //cache longer
   });
 }
 
@@ -73,7 +72,7 @@ interface SaveNoteArgs {
   noteId?: string;
 }
 
-/** Create or update a note,ingest it for RAG */
+// Create or update a note,ingest it for RAG
 export function useSaveNote() {
   const qc = useQueryClient();
   return useMutation({

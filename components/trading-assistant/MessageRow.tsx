@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Bot, User as UserIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import type { ChatMessage } from "@/lib/chat_store";
+import type { ChatMessage } from "@/hooks/chat_store";
 
 interface MessageRowProps {
   message: ChatMessage;

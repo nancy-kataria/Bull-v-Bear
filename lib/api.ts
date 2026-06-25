@@ -1,6 +1,6 @@
 import type { Ticker, TradingNote } from "@/types";
 
-/** Shared fetch helper: throws an Error carrying the API's message on failure. */
+// Shared fetch helper: throws an Error carrying the API's message on failure.
 async function request<T>(input: string, init?: RequestInit): Promise<T> {
   const res = await fetch(input, init);
   if (!res.ok) {
@@ -64,15 +64,12 @@ export function ingestNote(content: string, ticker: string, noteId: string): Pro
   });
 }
 
-// ---------------------------------------------------------------------------
 // Documents
-// ---------------------------------------------------------------------------
 export interface TickerDocumentDTO {
   id: string;
   fileName: string;
   fileType: string;
   createdAt: string;
-  /** Present on upload responses; 0 means no text was extracted/indexed. */
   chunksCreated?: number;
 }
 

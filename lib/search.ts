@@ -3,11 +3,8 @@ import { Prisma } from '@/app/generated/prisma';
 import { openai } from '@ai-sdk/openai';
 import { embed } from 'ai';
 
-/**
- * Semantic search over ingested note chunks using pgvector cosine distance.
- * Embeds the query in the same space the chunks were ingested into
- * (see app/api/ingest/route.ts) and returns the closest matches.
- */
+//Semantic search over ingested note chunks using pgvector cosine distance.
+//returns the closest matches.
 export async function findRelevantFinance(
   query: string,
   userId?: string | null,
