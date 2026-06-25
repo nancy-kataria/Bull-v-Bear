@@ -1,8 +1,17 @@
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Play, X } from "lucide-react";
 import { VerdictCard } from "@/components/landing-page/VerdictCard";
 
+// Add your demo video here later — a YouTube/Vimeo *embed* URL
+// (e.g. "https://www.youtube.com/embed/VIDEO_ID") or a hosted .mp4 URL.
+const DEMO_VIDEO_URL = "";
+
 export function Hero() {
+  const [videoOpen, setVideoOpen] = useState(false);
+
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 grid-paper opacity-40" aria-hidden />
@@ -53,12 +62,12 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
           >
-            <button className="group inline-flex items-center justify-center gap-2 rounded-lg bg-system px-5 py-3 text-sm font-semibold text-system-foreground shadow-[var(--glow-system)] transition hover:brightness-110">
-              Convene the Jury
-              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-            </button>
-            <button className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface/60 px-5 py-3 text-sm font-medium text-foreground backdrop-blur transition hover:bg-surface-elevated">
-              See a sample verdict
+            <button
+              onClick={() => setVideoOpen(true)}
+              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-system px-5 py-3 text-sm font-semibold text-system-foreground shadow-[var(--glow-system)] transition hover:brightness-110"
+            >
+              <Play className="h-4 w-4 fill-current" />
+              Watch Video Demo
             </button>
           </motion.div>
         </div>
@@ -96,6 +105,55 @@ export function Hero() {
           </div>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {videoOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-background/80 backdrop-blur-md"
+              onClick={() => setVideoOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+            <motion.div
+              className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elevated)]"
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: 8 }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
+            >
+              <button
+                onClick={() => setVideoOpen(false)}
+                aria-label="Close video"
+                className="absolute right-3 top-3 z-10 rounded-md bg-background/60 p-1.5 text-muted-foreground backdrop-blur transition hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="aspect-video w-full bg-black">
+                {DEMO_VIDEO_URL ? (
+                  <iframe
+                    src={DEMO_VIDEO_URL}
+                    title="Bull v. Bear — demo video"
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                    Demo video coming soon.
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

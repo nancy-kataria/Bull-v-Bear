@@ -47,7 +47,7 @@ The platform is designed for educational and research purposes. Instead of relyi
 | **AI / RAG** | OpenAI (embeddings + GPT-4o), Vercel AI SDK, Tavily, LangChain text splitters, Zod | Embeddings, vector retrieval, tool-calling research agent, multi-agent Bull/Bear/Judge debate with structured output |
 | **Documents** | unpdf, mammoth, Tesseract.js (OCR) | PDF/DOCX text extraction with an OCR fallback for scanned files |
 | **Auth & Storage** | Supabase Auth, Supabase Storage (private buckets + signed URLs + RLS) | Verified authentication and per-user document storage |
-| **Market data** | Alpha Vantage (via a cached server-side proxy) | Live quotes & movers with rate-limit handling and stale-on-error fallback |
+| **Market data** | Finnhub (via a cached server-side proxy) | Live quotes & ticker tape with rate-limit handling and stale-on-error fallback |
 | **Testing & Tooling** | Vitest, ESLint, GitHub Actions (CI) | Unit tests for pure logic, linting, and continuous integration |
 
 ### Concepts demonstrated
@@ -86,6 +86,7 @@ The platform is designed for educational and research purposes. Instead of relyi
    OPENAI_API_KEY=your_openai_key
    GEMINI_API_KEY=your_google_genai_key
    TAVILY_API_KEY=your_tavily_key
+   FINNHUB_API_KEY=your_finnhub_key
    SUPABASE_URL=your_supabase_url
    SUPABASE_ANON_KEY=your_supabase_anon_key
    ```

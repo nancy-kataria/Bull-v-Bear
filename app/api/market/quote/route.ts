@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { avFetch, RateLimitError } from "@/lib/market/alphaVantage";
+import { getQuote, RateLimitError } from "@/lib/market/finnhub";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const QUOTE_TTL_MS = 5 * 60 * 1000;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -15,26 +13,14 @@ export async function GET(req: Request) {
   }
 
   try {
-    const json = (await avFetch(
-      { function: "GLOBAL_QUOTE", symbol },
-      `quote:${symbol}`,
-      QUOTE_TTL_MS,
-    )) as Record<string, Record<string, string>>;
-
-    const quote = json["Global Quote"];
-    if (!quote || !quote["05. price"]) {
+    const quote = await getQuote(symbol);
+    if (!quote) {
       return NextResponse.json(
         { error: "Invalid stock symbol or no data available" },
         { status: 404 },
       );
     }
-
-    return NextResponse.json({
-      symbol: quote["01. symbol"],
-      price: parseFloat(quote["05. price"]),
-      change: parseFloat(quote["09. change"]),
-      changePercent: parseFloat(quote["10. change percent"]),
-    });
+    return NextResponse.json(quote);
   } catch (error) {
     if (error instanceof RateLimitError) {
       return NextResponse.json({ error: "rate_limited" }, { status: 429 });
