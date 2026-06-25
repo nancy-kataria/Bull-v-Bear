@@ -5,9 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, X } from "lucide-react";
 import { VerdictCard } from "@/components/landing-page/VerdictCard";
 
-// Add your demo video here later — a YouTube/Vimeo *embed* URL
-// (e.g. "https://www.youtube.com/embed/VIDEO_ID") or a hosted .mp4 URL.
-const DEMO_VIDEO_URL = "";
+const DEMO_VIDEO_URL = "https://www.youtube.com/embed/6WgFODCBq1I";
 
 export function Hero() {
   const [videoOpen, setVideoOpen] = useState(false);
