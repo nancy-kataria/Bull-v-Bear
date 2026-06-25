@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import type { RiskPillProps } from '@/types';
+interface RiskPillProps {
+  tag: string;
+  relatedSentence?: string;
+  onHover: (tag: string | null) => void;
+  active: boolean;
+}
 
 export default function RiskPill({ tag, onHover, active }: RiskPillProps) {
   const [hovered, setHovered] = useState(false);

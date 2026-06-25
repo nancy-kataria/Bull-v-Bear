@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import type { GaugeProps, VerdictType } from '@/types';
+import type { VerdictType } from '@/types';
+
+interface GaugeProps {
+  confidence: number;
+  verdict: VerdictType;
+  size?: number;
+}
 
 const verdictColor: Record<VerdictType, string> = {
   BUY: '#10B981',

@@ -1,5 +1,11 @@
 import { ChevronRight } from 'lucide-react';
-import type { BullBearPodiumProps } from '@/types';
+import type { Argument } from '@/types';
+
+interface BullBearPodiumProps {
+  side: 'bull' | 'bear';
+  arguments: Argument[];
+  streaming?: boolean;
+}
 
 export default function BullBearPodium({ side, arguments: args, streaming = false }: BullBearPodiumProps) {
   const isBull = side === 'bull';

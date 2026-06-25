@@ -1,7 +1,14 @@
 import { Scale, Gavel } from 'lucide-react';
 import BullBearPodium from '@/components/analysis-room/BullBearPodium';
 import DisplayVerdictCard from '@/components/DisplayVerdictCard';
-import { AnalysisPanelProps } from '@/types';
+import type { Phase, VerdictData } from '@/types';
+
+interface AnalysisPanelProps {
+  phase: Phase;
+  showBull: boolean;
+  showBear: boolean;
+  verdict: VerdictData | null;
+}
 
 
 

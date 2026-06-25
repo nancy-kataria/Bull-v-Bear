@@ -1,5 +1,9 @@
 import { motion } from "framer-motion";
-import type { ConfidenceGaugeProps } from '@/types';
+interface ConfidenceGaugeProps {
+  value: number;
+  size?: number;
+  variant?: 'bull' | 'bear' | 'judge';
+}
 
 export function ConfidenceGauge({ value, size = 120, variant = "bull" }: ConfidenceGaugeProps) {
   const stroke = 10;

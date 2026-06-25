@@ -1,5 +1,9 @@
 import { Check, Loader2 } from 'lucide-react';
-import type { ProcessingStepsProps } from '@/types';
+import type { ProcessingStep } from '@/types';
+
+interface ProcessingStepsProps {
+  steps: ProcessingStep[];
+}
 
 export default function ProcessingSteps({ steps }: ProcessingStepsProps) {
   return (

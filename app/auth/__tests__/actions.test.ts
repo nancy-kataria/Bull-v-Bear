@@ -17,7 +17,11 @@ type OAuthResponse = {
 };
 
 type SignUpData = {
-  user: { id: string; email: string } | null;
+  user: {
+    id: string;
+    email: string;
+    user_metadata?: Record<string, unknown>;
+  } | null;
 };
 
 type SignInData = {
@@ -121,9 +125,30 @@ describe("Authentication Server Actions", () => {
         where: { id: "new-uid" },
       });
       expect(mockedPrismaUser.create).toHaveBeenCalledWith({
-        data: { id: "new-uid", email: "test@test.com" },
+        data: { id: "new-uid", email: "test@test.com", name: null },
       });
       expect(result.success).toBe(true);
+    });
+
+    test("should save the user's name from auth metadata when provided", async () => {
+      vi.mocked(mockSupabaseClient.auth.signUp).mockResolvedValue({
+        data: {
+          user: {
+            id: "named-uid",
+            email: "jane@test.com",
+            user_metadata: { name: "Jane Doe" },
+          },
+        },
+        error: null,
+      } satisfies AuthResponse<SignUpData>);
+
+      vi.mocked(mockedPrismaUser.findUnique).mockResolvedValue(null as never);
+
+      await signUpWithEmail("jane@test.com", "password123", "Jane Doe");
+
+      expect(mockedPrismaUser.create).toHaveBeenCalledWith({
+        data: { id: "named-uid", email: "jane@test.com", name: "Jane Doe" },
+      });
     });
 
     test("should skip Prisma creation if user already exists", async () => {

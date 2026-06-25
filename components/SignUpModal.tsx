@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { signUpWithEmail, signInWithGoogle } from '@/app/auth/actions'
 import { useRouter } from 'next/navigation'
 import { X, Loader2 } from 'lucide-react'
-import type { SignUpModalProps } from '@/types'
+interface SignUpModalProps {
+  isOpen: boolean
+  onClose: () => void
+}
 
 export function SignUpModal({ isOpen, onClose }: SignUpModalProps) {
   const router = useRouter()

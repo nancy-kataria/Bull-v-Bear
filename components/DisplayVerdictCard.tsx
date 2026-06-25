@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import type { DisplayVerdictCardProps, VerdictType } from '@/types';
+import type { VerdictType, VerdictData } from '@/types';
+
+interface DisplayVerdictCardProps {
+  data: VerdictData;
+  animate?: boolean;
+}
 import Gauge from '@/components/Gauge';
 import RiskPill from '@/components/RiskPill';
 
