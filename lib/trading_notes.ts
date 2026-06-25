@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import type { Folder, Ticker, TradingNote } from "@/types";
+import type { DocType, Folder, Ticker, TradingNote } from "@/types";
 
 export type { Folder } from "@/types";
 
@@ -8,7 +8,6 @@ export function useTradingNotes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all tickers and their notes on mount
   useEffect(() => {
     const fetchTickers = async () => {
       try {
@@ -28,6 +27,7 @@ export function useTradingNotes() {
             createdAt: new Date(note.createdAt).getTime(),
             updatedAt: new Date(note.updatedAt).getTime(),
           })),
+          docs: [],
         }));
 
         setFolders(transformedFolders);
@@ -55,7 +55,6 @@ export function useTradingNotes() {
 
       const newNote = await response.json();
 
-      // Update local state
       setFolders((prev) =>
         prev.map((f) =>
           f.ticker === ticker
@@ -91,7 +90,6 @@ export function useTradingNotes() {
 
       const updatedNote = await response.json();
 
-      // Update local state
       setFolders((prev) =>
         prev.map((f) =>
           f.ticker === ticker
@@ -123,7 +121,6 @@ export function useTradingNotes() {
 
       if (!response.ok) throw new Error("Failed to delete note");
 
-      // Update local state
       setFolders((prev) =>
         prev.map((f) =>
           f.ticker === ticker
@@ -154,6 +151,30 @@ export function useTradingNotes() {
     }
   }, [folders]);
 
+  const addDoc = useCallback((ticker: string, name: string, type: DocType, size?: number) => {
+    setFolders((prev) =>
+      prev.map((f) =>
+        f.ticker === ticker
+          ? {
+              ...f,
+              docs: [
+                { id: crypto.randomUUID(), name, type, size, createdAt: Date.now() },
+                ...f.docs,
+              ],
+            }
+          : f,
+      ),
+    );
+  }, []);
+
+  const deleteDoc = useCallback((ticker: string, id: string) => {
+    setFolders((prev) =>
+      prev.map((f) =>
+        f.ticker === ticker ? { ...f, docs: f.docs.filter((d) => d.id !== id) } : f,
+      ),
+    );
+  }, []);
+
   const addFolder = useCallback(async (ticker: string) => {
     try {
       // Check if ticker already exists
@@ -177,6 +198,7 @@ export function useTradingNotes() {
           id: newTicker.id,
           ticker: newTicker.symbol,
           notes: [],
+          docs: [],
         },
         ...prev,
       ]);

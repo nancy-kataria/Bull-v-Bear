@@ -59,11 +59,15 @@ export default function ExhibitHall({ sources }: Props) {
         {sources.map((source, i) => {
           const cfg = sourceConfig[source.type];
           const Icon = cfg.icon;
-          return (
-            <div
-              key={source.id}
-              className="group flex items-start gap-3 p-3 rounded-lg bg-navy-800 border border-neutral-border hover:border-electric/30 hover:bg-navy-700/60 transition-all duration-200 cursor-pointer"
-            >
+          const isLink = source.type === "web" && !!source.url;
+          const cardClass = `group flex items-start gap-3 p-3 rounded-lg bg-navy-800 border border-neutral-border transition-all duration-200 ${
+            isLink
+              ? "hover:border-electric/30 hover:bg-navy-700/60 cursor-pointer"
+              : "hover:border-neutral-muted/40"
+          }`;
+
+          const inner = (
+            <>
               <div
                 className={`flex items-center justify-center w-7 h-7 rounded ${cfg.bg} ${cfg.color} shrink-0 mt-0.5`}
               >
@@ -74,18 +78,27 @@ export default function ExhibitHall({ sources }: Props) {
                   <span className="text-xs font-medium text-neutral-white leading-snug group-hover:text-neutral-white/90 line-clamp-2">
                     {source.title}
                   </span>
-                  <ExternalLink
-                    size={11}
-                    className="text-neutral-muted shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                  />
+                  {isLink && (
+                    <ExternalLink
+                      size={11}
+                      className="text-neutral-muted shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  )}
                 </div>
-                <div className="flex items-center gap-2 mt-1">
+                {source.snippet && (
+                  <p className="text-xs text-neutral-muted leading-snug mt-1 line-clamp-3">
+                    {source.snippet}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 mt-1.5">
                   <span className={`text-xs font-mono ${cfg.color}`}>
                     {source.domain}
                   </span>
-                  <span className="text-xs text-neutral-muted">
-                    {source.date}
-                  </span>
+                  {source.date && (
+                    <span className="text-xs text-neutral-muted">
+                      {source.date}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="shrink-0">
@@ -93,6 +106,22 @@ export default function ExhibitHall({ sources }: Props) {
                   EX-{String(i + 1).padStart(2, "0")}
                 </span>
               </div>
+            </>
+          );
+
+          return isLink ? (
+            <a
+              key={source.id}
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cardClass}
+            >
+              {inner}
+            </a>
+          ) : (
+            <div key={source.id} className={cardClass}>
+              {inner}
             </div>
           );
         })}

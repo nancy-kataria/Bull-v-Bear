@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, ChevronRight, FileText, Globe, StickyNote } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { DisplayVerdictCardProps, VerdictType } from '@/types';
 import Gauge from '@/components/Gauge';
 import RiskPill from '@/components/RiskPill';
@@ -31,15 +31,8 @@ const verdictConfig: Record<VerdictType, { label: string; bg: string; border: st
   },
 };
 
-const sourceIcon = (type: string) => {
-  if (type === 'filing') return <FileText size={12} />;
-  if (type === 'note') return <StickyNote size={12} />;
-  return <Globe size={12} />;
-};
-
 export default function DisplayVerdictCard({ data, animate = false }: DisplayVerdictCardProps) {
   const [hoveredRisk, setHoveredRisk] = useState<string | null>(null);
-  const [sourcesExpanded, setSourcesExpanded] = useState(false);
   const cfg = verdictConfig[data.verdict];
   let quoteSummary = null;
 
@@ -115,54 +108,6 @@ export default function DisplayVerdictCard({ data, animate = false }: DisplayVer
         </div>
       </div>
 
-      <div className="border-t border-neutral-border">
-        <button
-          onClick={() => setSourcesExpanded(!sourcesExpanded)}
-          className="w-full flex items-center justify-between px-5 py-3 hover:bg-navy-700/50 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-1">
-              {[0, 1, 2].map(i => (
-                <div
-                  key={i}
-                  className="w-6 h-7 bg-navy-600 border border-neutral-border rounded-sm"
-                  style={{ transform: `rotate(${(i - 1) * 4}deg)`, zIndex: i }}
-                />
-              ))}
-            </div>
-            <span className="text-xs font-mono text-neutral-label tracking-wide">EVIDENCE FOLDER</span>
-            <span className="text-xs font-mono text-neutral-muted">({data.sources.length} exhibits)</span>
-          </div>
-          <ChevronRight
-            size={14}
-            className={`text-neutral-muted transition-transform duration-300 ${sourcesExpanded ? 'rotate-90' : ''}`}
-          />
-        </button>
-
-        {sourcesExpanded && (
-          <div className="px-5 pb-4 space-y-2 animate-fade-in">
-            {data.sources.map((source, i) => (
-              <div
-                key={source.id}
-                className="flex items-start gap-3 p-3 rounded-lg bg-navy-800 border border-neutral-border hover:border-electric/40 transition-colors"
-                style={{ animationDelay: `${i * 60}ms` }}
-              >
-                <div className="flex items-center justify-center w-6 h-6 rounded bg-navy-600 text-neutral-muted shrink-0 mt-0.5">
-                  {sourceIcon(source.type)}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-medium text-neutral-white truncate">{source.title}</div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className={`text-xs font-mono ${source.type === 'note' ? 'text-amber-verdict' : 'text-electric'}`}>{source.domain}</span>
-                    <span className="text-xs text-neutral-muted">{source.date}</span>
-                  </div>
-                </div>
-                <span className="text-xs font-mono text-neutral-muted shrink-0">EX-{String(i + 1).padStart(2, '0')}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }

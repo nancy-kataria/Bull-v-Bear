@@ -5,6 +5,74 @@ import { tavilySearch } from "@tavily/ai-sdk";
 import { findRelevantFinance } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/prisma/prisma";
+import type { Source } from "@/types";
+
+const SNIPPET_LEN = 220;
+
+function hostname(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "web";
+  }
+}
+
+function buildWebSources(
+  steps: { toolResults: { output?: unknown }[] }[],
+): Source[] {
+  const sources: Source[] = [];
+  for (const step of steps) {
+    for (const tr of step.toolResults) {
+      const out = tr.output;
+      if (
+        !out ||
+        typeof out !== "object" ||
+        !Array.isArray((out as { results?: unknown }).results)
+      ) {
+        continue;
+      }
+      const results = (out as {
+        results: {
+          title?: string;
+          url?: string;
+          content?: string;
+          publishedDate?: string;
+        }[];
+      }).results;
+      for (const r of results) {
+        if (!r?.url) continue;
+        sources.push({
+          id: `web-${sources.length}`,
+          type: "web",
+          title: r.title || r.url,
+          domain: hostname(r.url),
+          url: r.url,
+          snippet: (r.content || "").slice(0, SNIPPET_LEN),
+          date: (r.publishedDate || "").slice(0, 10),
+        });
+      }
+    }
+  }
+  return sources;
+}
+
+/** The user's retrieved note/document chunks → internal sources (snippets, no URL). */
+function buildInternalSources(
+  results: { id: string; content: string; ticker: string }[],
+  activeTicker: string | null,
+): Source[] {
+  return results
+    .filter((r) => r.content)
+    .map((r, i) => ({
+      id: r.id || `note-${i}`,
+      type: "note" as const,
+      title: `${(r.ticker || activeTicker || "Your").toUpperCase()} — from your library`,
+      domain: "Your notes & documents",
+      url: "",
+      snippet: r.content.slice(0, SNIPPET_LEN),
+      date: "",
+    }));
+}
 
 const AnalystSchema = z.object({
   points: z.array(
@@ -45,42 +113,46 @@ export async function POST(req: Request) {
       ? tickerContext.toUpperCase() 
       : (tickerMatch ? tickerMatch[1].toUpperCase() : null);
 
-    // to gather context (Local RAG + Tavily Web Search)
+    // Deterministic local RAG: always retrieve the user's relevant notes/documents
+    // for this ticker, rather than leaving it to the model to decide to call a tool.
+    const localResults = await findRelevantFinance(
+      lastMessage,
+      user.id,
+      6,
+      activeTicker,
+    );
+
+    // Web research via the model (Tavily) for fresh external context.
     const researchResult = await generateText({
       model: openai("gpt-4o"),
       system:
-        "You are a research assistant. Find the most relevant financial facts.",
+        "You are a research assistant. Use web search to find the most relevant, recent financial facts.",
       prompt: lastMessage,
       tools: {
-        searchLocalDB: {
-          description:
-            "Search internal database for historical financial insights.",
-          inputSchema: z.object({ query: z.string() }),
-          execute: async ({ query }) => {
-            const results = await findRelevantFinance(
-              query,
-              user.id,
-              3,
-              activeTicker,
-            );
-            return JSON.stringify(results);
-          },
-        },
         searchWeb: tavilySearch({
           apiKey: process.env.TAVILY_API_KEY,
           searchDepth: "advanced",
         }),
       },
     });
-    const context = researchResult.text;
 
-    const sources = researchResult.steps
-      .flatMap((step) => step.toolResults.map((tr) => tr.output))
-      .filter(Boolean);
+    // Internal sources first (the user's own data), then web — one ordered array
+    // so the sourceIndex the analysts cite lines up with what the UI renders.
+    const internalSources = buildInternalSources(localResults, activeTicker);
+    const webSources = buildWebSources(researchResult.steps);
+    const sources = [...internalSources, ...webSources];
+
+    // Feed both the user's data and web findings into the debate context.
+    const localContext = localResults
+      .map((r, i) => `[Your note/doc ${i}] (${r.ticker}): ${r.content}`)
+      .join("\n\n");
+    const context = [localContext, researchResult.text]
+      .filter(Boolean)
+      .join("\n\n");
 
     const indexedSourcesForAI = sources
-      .map((s, i) => `[Source ${i}]: ${JSON.stringify(s)}`)
-      .join("\n");
+      .map((s, i) => `[Source ${i}] (${s.type}): ${s.title}\n${s.snippet ?? ""}`)
+      .join("\n\n");
 
     // parallel debate (Bull vs Bear)
     const [bull, bear] = await Promise.all([

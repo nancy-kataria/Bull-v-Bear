@@ -22,7 +22,13 @@ export function NoteEditorModal({
   isSaving = false,
 }: Props) {
   const [body, setBody] = useState(initialBody);
+  const [wasOpen, setWasOpen] = useState(open);
   const taRef = useRef<HTMLTextAreaElement>(null);
+
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setBody(initialBody);
+  }
 
   useEffect(() => {
     const ta = taRef.current;

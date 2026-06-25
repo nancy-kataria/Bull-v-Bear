@@ -19,6 +19,7 @@ interface InputPanelProps {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   onSuggestionClick: (suggestion: string) => void;
   autoResize: () => void;
+  showSuggestions?: boolean;
 }
 
 export function InputPanel({
@@ -31,9 +32,10 @@ export function InputPanel({
   textareaRef,
   onSuggestionClick,
   autoResize,
+  showSuggestions = true,
 }: InputPanelProps) {
   return (
-    <div className="border-r border-neutral-border bg-navy-900/40 flex flex-col p-6 gap-5">
+    <div className="border-r border-neutral-border bg-navy-900/40 flex flex-col p-6 gap-5 overflow-y-auto min-h-0">
       <div>
         <h2 className="text-xs font-mono font-semibold text-neutral-label tracking-widest uppercase mb-1">Inquiry</h2>
         <p className="text-xs text-neutral-muted">State your investment thesis or ask a question</p>
@@ -87,7 +89,7 @@ export function InputPanel({
         </div>
       )}
 
-      {phase === 'idle' && (
+      {phase === 'idle' && showSuggestions && (
         <div>
           <div className="text-xs font-mono text-neutral-muted tracking-wide mb-2">SUGGESTED QUERIES</div>
           <div className="space-y-2">

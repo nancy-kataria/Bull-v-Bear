@@ -47,14 +47,11 @@ model TradingNote {
 
 model NoteChunk {
   id           String                       @id @default(cuid())
-  // A chunk belongs to either a TradingNote or a TickerDocument.
   noteId       String?
   note         TradingNote?                 @relation(fields: [noteId], references: [id], onDelete: Cascade)
   documentId   String?
   document     TickerDocument?              @relation(fields: [documentId], references: [id], onDelete: Cascade)
   chunkContent String                       @db.Text
-  // pgvector column populated via raw SQL in app/api/ingest/route.ts.
-  // Requires the `vector` extension; dimension matches text-embedding-3-small.
   embedding    Unsupported("vector(1536)")?
 
   @@index([noteId])
@@ -66,11 +63,10 @@ model TickerDocument {
   userId    String
   tickerId  String
   ticker    Ticker      @relation(fields: [tickerId], references: [id], onDelete: Cascade)
-  fileName  String // E.g., "Q1_2026_Earnings.pdf"
-  fileUrl   String // The public Supabase Storage bucket link
-  fileType  String // E.g., "application/pdf"
-  fullText  String      @db.Text // The raw extracted text string for viewing inside your tab reader
-  chunks    NoteChunk[] // Document files break down into chunks for RAG search
+  fileName  String
+  fileUrl   String      // Storage path within the private `ticker-documents` bucket
+  fileType  String      
+  chunks    NoteChunk[] 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

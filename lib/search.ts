@@ -25,9 +25,9 @@ export async function findRelevantFinance(
 
   const vectorString = `[${embedding.join(',')}]`;
 
-  // Build dynamic filters. A chunk must have an embedding to be ranked.
   const conditions: Prisma.Sql[] = [Prisma.sql`nc."embedding" IS NOT NULL`];
-  if (userId) conditions.push(Prisma.sql`tn."userId" = ${userId}`);
+  if (userId)
+    conditions.push(Prisma.sql`COALESCE(tn."userId", td."userId") = ${userId}`);
   if (ticker) conditions.push(Prisma.sql`t."symbol" = ${ticker.toUpperCase()}`);
 
   const rows = await prisma.$queryRaw<
@@ -35,8 +35,9 @@ export async function findRelevantFinance(
   >(Prisma.sql`
     SELECT nc."id", nc."chunkContent", t."symbol"
     FROM "NoteChunk" nc
-    JOIN "TradingNote" tn ON tn."id" = nc."noteId"
-    JOIN "Ticker" t ON t."id" = tn."tickerId"
+    LEFT JOIN "TradingNote" tn ON tn."id" = nc."noteId"
+    LEFT JOIN "TickerDocument" td ON td."id" = nc."documentId"
+    JOIN "Ticker" t ON t."id" = COALESCE(tn."tickerId", td."tickerId")
     WHERE ${Prisma.join(conditions, ' AND ')}
     ORDER BY nc."embedding" <=> ${vectorString}::vector
     LIMIT ${limit}

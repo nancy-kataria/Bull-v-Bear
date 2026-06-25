@@ -157,6 +157,16 @@
   .font-mono {
     font-family: var(--font-mono);
   }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  label[role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
 }
 
 @layer utilities {

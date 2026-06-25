@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Tesseract.js OCR language models (auto-downloaded at runtime)
+*.traineddata
+
+# Local sample/test documents (illustrative fixtures, not part of the app)
+/sample-documents

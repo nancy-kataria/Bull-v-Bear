@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Header } from '@/components/analysis-room/Header';
+import { RotateCcw } from 'lucide-react';
+import { Header } from '@/components/Header';
 import { InputPanel } from '@/components/analysis-room/InputPanel';
 import { AnalysisPanel } from '@/components/analysis-room/AnalysisPanel';
 import ExhibitHall from '@/components/analysis-room/ExhibitHall';
 import { Footer } from '@/components/Footer';
 import { useProtected } from '@/lib/use-protected';
-import type { Argument, ChatAnalystPoint, ChatApiResponse, ChatPageSearchResult, Phase, ProcessingStep, Source, VerdictData } from '@/types';
+import type { Argument, ChatAnalystPoint, ChatApiResponse, Phase, ProcessingStep, Source, VerdictData } from '@/types';
 
 const STEPS_SEQUENCE: { delay: number; id: string; label: string }[] = [
   { delay: 400, id: 'p1', label: 'Summoning Analysts...' },
@@ -19,24 +20,6 @@ const STEPS_SEQUENCE: { delay: number; id: string; label: string }[] = [
 ];
 
 const extractTicker = (query: string) => query.match(/\$([A-Z]{1,5})\b/)?.[1] ?? 'NVDA';
-
-const normalizeSourceType = (value: unknown): Source['type'] => {
-  return value === 'filing' || value === 'note' ? value : 'web';
-};
-
-const toExhibitSource = (result: ChatPageSearchResult, index: number): Source => {
-  const content = result.content?.trim() ?? '';
-  const metadata = result.metadata ?? {};
-
-  return {
-    id: result.id ?? `search-${index}`,
-    title: metadata.title ?? (content.slice(0, 90) || `Relevant exhibit ${index + 1}`),
-    domain: metadata.domain ?? 'database',
-    url: metadata.url ?? '#',
-    type: normalizeSourceType(metadata.type),
-    date: metadata.date ?? new Date().toISOString().slice(0, 10),
-  };
-};
 
 const buildArguments = (
   analystData: { points: ChatAnalystPoint[] }
@@ -111,16 +94,18 @@ function JuryRoomPageContent() {
     setSteps(STEPS_SEQUENCE.map(s => ({ id: s.id, label: s.label, status: 'pending' as const })));
 
     try {
-      // Update steps as they complete
+      // Cosmetic progress timeline. The final step stays in a spinning "running"
+      // state until the real response arrives — it is NOT auto-completed, and the
+      // phase stays on 'deliberating' (streaming skeletons) the whole time.
       STEPS_SEQUENCE.forEach(step => {
         const t = setTimeout(() => {
           if (requestId !== requestIdRef.current) return;
-          setSteps(prev => prev.map(s => s.id === step.id ? { ...s, status: 'done' as const } : s));
-          
+          const isLast = step.id === 'p5';
+          setSteps(prev => prev.map(s => s.id === step.id ? { ...s, status: isLast ? 'running' as const : 'done' as const } : s));
+
           if (step.id === 'p1') setShowBull(true);
           else if (step.id === 'p2') setShowBear(true);
           else if (step.id === 'p3') setPhase('deliberating');
-          else if (step.id === 'p5') setPhase('verdict');
         }, step.delay);
         timersRef.current.push(t);
       });
@@ -143,11 +128,16 @@ function JuryRoomPageContent() {
 
       if (requestId !== requestIdRef.current) return;
 
-      const sources = (data.sources as ChatPageSearchResult[])?.map((s, i) => toExhibitSource(s, i)) ?? [];
+      const sources = (data.sources as Source[]) ?? [];
       const verdictData = buildVerdictData(input, data, sources, tickerParam);
 
+      clearTimers();
+      setSteps(prev => prev.map(s => ({ ...s, status: 'done' as const })));
+      setShowBull(true);
+      setShowBear(true);
       setExhibits(sources);
       setVerdict(verdictData);
+      setPhase('verdict');
     } catch (error) {
       if (requestId !== requestIdRef.current) return;
 
@@ -203,8 +193,28 @@ function JuryRoomPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-navy-950 flex flex-col">
-      <Header phase={phase} onReset={handleReset} />
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-navy-950 flex flex-col">
+      <Header
+        maxWidth="max-w-full"
+        backLink={{ href: '/dashboard', label: 'Dashboard' }}
+        actions={
+          <>
+            {phase !== 'idle' && (
+              <button
+                onClick={handleReset}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-border text-neutral-muted hover:text-neutral-white hover:border-neutral-muted transition-all text-xs"
+              >
+                <RotateCcw size={12} />
+                New Case
+              </button>
+            )}
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono ${phase === 'idle' ? 'border-neutral-border text-neutral-muted' : phase === 'verdict' ? 'border-bull/40 text-bull bg-bull-dim/20' : 'border-electric/40 text-electric bg-electric-dim/20'}`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${phase === 'idle' ? 'bg-neutral-muted' : phase === 'verdict' ? 'bg-bull' : 'bg-electric animate-pulse'}`} />
+              {phase === 'idle' ? 'Standby' : phase === 'processing' ? 'Processing' : phase === 'deliberating' ? 'Deliberating' : 'Verdict Ready'}
+            </div>
+          </>
+        }
+      />
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-[320px_1fr_260px] gap-0 min-h-0">
         <InputPanel
@@ -217,6 +227,7 @@ function JuryRoomPageContent() {
           textareaRef={textareaRef}
           onSuggestionClick={setInput}
           autoResize={autoResize}
+          showSuggestions={!tickerParam}
         />
 
         <AnalysisPanel
@@ -226,12 +237,12 @@ function JuryRoomPageContent() {
           verdict={verdict}
         />
 
-        <div className="border-l border-neutral-border bg-navy-900/40 hidden lg:flex flex-col overflow-hidden">
+        <div className="border-l border-neutral-border bg-navy-900/40 hidden lg:flex flex-col overflow-hidden min-h-0">
           <ExhibitHall sources={phase === 'verdict' && verdict ? verdict.sources : exhibits} />
         </div>
       </div>
 
-      <Footer />
+      <Footer compact />
     </div>
   );
 }

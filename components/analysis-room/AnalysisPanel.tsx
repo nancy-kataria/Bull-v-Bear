@@ -7,7 +7,7 @@ import { AnalysisPanelProps } from '@/types';
 
 export function AnalysisPanel({ phase, showBull, showBear, verdict }: AnalysisPanelProps) {
   return (
-    <div className="flex flex-col gap-5 p-6 overflow-y-auto">
+    <div className="flex flex-col gap-5 p-6 overflow-y-auto min-h-0">
       {phase === 'idle' && (
         <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center py-20">
           <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-navy-800 border border-neutral-border">

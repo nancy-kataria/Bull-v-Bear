@@ -125,6 +125,7 @@ export interface Source {
   url: string;
   type: 'web' | 'note' | 'filing';
   date: string;
+  snippet?: string;
 }
 
 export interface VerdictData {
@@ -196,6 +197,7 @@ export interface Folder {
   id: string;
   ticker: string;
   notes: (Note & { dbId?: string })[];
+  docs: Doc[];
 }
 
 export interface AnalysisPanelProps {
@@ -204,3 +206,13 @@ export interface AnalysisPanelProps {
   showBear: boolean;
   verdict: VerdictData | null;
 }
+
+export type DocType = "pdf" | "docx";
+
+export type Doc = {
+  id: string;
+  name: string;
+  type: DocType;
+  size?: number;
+  createdAt: number;
+};

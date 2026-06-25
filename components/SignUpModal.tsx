@@ -8,6 +8,7 @@ import type { SignUpModalProps } from '@/types'
 
 export function SignUpModal({ isOpen, onClose }: SignUpModalProps) {
   const router = useRouter()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -35,8 +36,8 @@ export function SignUpModal({ isOpen, onClose }: SignUpModalProps) {
     }
 
     try {
-      const result = await signUpWithEmail(email, password)
-      
+      const result = await signUpWithEmail(email, password, name)
+
       if (!result.success) {
         setError(result.error || 'Failed to sign up')
         setLoading(false)
@@ -45,6 +46,7 @@ export function SignUpModal({ isOpen, onClose }: SignUpModalProps) {
 
       // Show success message
       setSuccess(true)
+      setName('')
       setEmail('')
       setPassword('')
       setConfirmPassword('')
@@ -97,6 +99,23 @@ export function SignUpModal({ isOpen, onClose }: SignUpModalProps) {
           <>
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name Field */}
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium text-foreground">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Jane Doe"
+                  required
+                  className="w-full rounded-lg border border-border bg-surface px-4 py-2.5 text-foreground placeholder-muted-foreground outline-none transition focus:border-system focus:shadow-[0_0_0_2px_rgba(0,0,0,0.1)]"
+                  disabled={loading}
+                />
+              </div>
+
               {/* Email Field */}
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-foreground">
@@ -156,7 +175,7 @@ export function SignUpModal({ isOpen, onClose }: SignUpModalProps) {
 
               <button
                 type="submit"
-                disabled={loading || !email || !password || !confirmPassword}
+                disabled={loading || !name || !email || !password || !confirmPassword}
                 className="mt-6 w-full flex items-center justify-center gap-2 rounded-lg bg-system px-5 py-3 text-sm font-semibold text-system-foreground transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading && <Loader2 size={16} className="animate-spin" />}

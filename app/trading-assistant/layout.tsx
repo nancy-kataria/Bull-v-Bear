@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo } from "react";
 import { useRouter, usePathname, useParams } from "next/navigation";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { MessageSquarePlus, Trash2, MessageSquare, LogOut } from "lucide-react";
 import { useThreads } from "@/lib/chat_store";
 import Link from "next/link";
 import { useProtected } from "@/lib/use-protected";
 import { signOut } from "@/app/auth/actions";
+import { Header } from "@/components/Header";
 
 export default function TradingAgentLayout({ children }: { children: React.ReactNode }) {
   const { threads, ready, createThread, deleteThread } = useThreads();
@@ -64,35 +64,19 @@ export default function TradingAgentLayout({ children }: { children: React.React
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="border-b border-border/60 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-3">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="relative flex h-10 w-10 items-center justify-center">
-              <Image 
-                src="/Green-Bull.png" 
-                alt="Bull v. Bear" 
-                width={40} 
-                height={40} 
-                className="h-full w-full"
-              />
-              <span
-                className="absolute -inset-px rounded-lg"
-                style={{ boxShadow: "var(--glow-system)", opacity: 0.4 }}
-              />
-            </div>
-            <span className="font-mono text-sm font-semibold tracking-wide">Bull v. Bear</span>
-            <span className="ml-2 hidden rounded-md border border-border bg-surface px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground sm:inline">
-              Trading Assistant
-            </span>
-          </Link>
+      <Header
+        maxWidth="max-w-[1600px]"
+        backLink={{ href: "/dashboard", label: "Dashboard" }}
+        badge="Trading Assistant"
+        actions={
           <button
             onClick={() => signOut()}
             className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground"
           >
             <LogOut className="h-3.5 w-3.5" /> Sign Out
           </button>
-        </div>
-      </header>
+        }
+      />
 
       <div className="grid min-h-0 flex-1 grid-cols-[280px_1fr]">
         <aside className="flex min-h-0 flex-col border-r border-border/60 bg-card/30">

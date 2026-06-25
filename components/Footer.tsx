@@ -1,8 +1,8 @@
 import Image from "next/image";
 
-export function Footer() {
+export function Footer({ compact = false }: { compact?: boolean }) {
   return (
-    <footer className="border-t border-border/60 py-10">
+    <footer className={`border-t border-border/60 ${compact ? "py-5" : "py-10"}`}>
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
         <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
           <Image 

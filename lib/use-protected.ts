@@ -1,42 +1,25 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
 import { getUser } from '@/app/auth/get-session'
 
 export function useProtected() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['auth-user'],
+    queryFn: () => getUser(),
+    staleTime: 0,
+    retry: false,
+  })
 
   useEffect(() => {
-    let isMounted = true
-
-    const checkAuth = async () => {
-      try {
-        const user = await getUser()
-        if (isMounted) {
-          if (!user) {
-            router.replace('/')
-          } else {
-            setIsAuthenticated(true)
-          }
-          setIsLoading(false)
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error)
-        if (isMounted) {
-          router.replace('/')
-        }
-      }
+    if (!isLoading && !user) {
+      router.replace('/')
     }
+  }, [isLoading, user, router])
 
-    checkAuth()
-
-    return () => {
-      isMounted = false
-    }
-  }, [router])
-
-  return { isLoading, isAuthenticated }
+  return { isLoading, isAuthenticated: !!user }
 }

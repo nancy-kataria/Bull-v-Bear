@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
-import { prisma } from '@/prisma/prisma'
+import { ensureUserRecord } from '@/lib/auth/ensure-user'
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
@@ -25,32 +25,23 @@ export async function signInWithGoogle() {
   return redirect(data.url)
 }
 
-export async function signUpWithEmail(email: string, password: string) {
+export async function signUpWithEmail(email: string, password: string, name?: string) {
   const supabase = await createClient()
 
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    // Store the name in Supabase auth metadata so it's available on every login.
+    options: name?.trim() ? { data: { name: name.trim() } } : undefined,
   })
 
   if (error) {
     return { success: false, error: error.message }
   }
 
-  // Create user record in database if sign up was successful
+  // Create the user record (saves the name via ensureUserRecord).
   if (data.user) {
-    const existingUser = await prisma.user.findUnique({
-      where: { id: data.user.id }
-    })
-    
-    if (!existingUser) {
-      await prisma.user.create({
-        data: {
-          id: data.user.id,
-          email: data.user.email || '',
-        }
-      })
-    }
+    await ensureUserRecord(data.user)
   }
 
   return { success: true, message: 'Check your email to verify your account' }
@@ -68,20 +59,9 @@ export async function signInWithEmail(email: string, password: string) {
     return { success: false, error: error.message }
   }
 
-  // Ensure user record exists in database
+  // Ensure user record exists (backfills name from metadata if present).
   if (data.user) {
-    const existingUser = await prisma.user.findUnique({
-      where: { id: data.user.id }
-    })
-    
-    if (!existingUser) {
-      await prisma.user.create({
-        data: {
-          id: data.user.id,
-          email: data.user.email || '',
-        }
-      })
-    }
+    await ensureUserRecord(data.user)
   }
 
   return { success: true }
