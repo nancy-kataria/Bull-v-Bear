@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface ManifestoProps {
   setShowSignUpModal: (value: boolean) => void;

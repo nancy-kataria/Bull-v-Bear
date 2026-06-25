@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import type { DocType, Folder, Ticker, TradingNote } from "@/types";
+import type { Folder, Ticker, TradingNote } from "@/types";
 
 export type { Folder } from "@/types";
 
@@ -150,30 +150,6 @@ export function useTradingNotes() {
       console.error("Error deleting folder:", err);
     }
   }, [folders]);
-
-  const addDoc = useCallback((ticker: string, name: string, type: DocType, size?: number) => {
-    setFolders((prev) =>
-      prev.map((f) =>
-        f.ticker === ticker
-          ? {
-              ...f,
-              docs: [
-                { id: crypto.randomUUID(), name, type, size, createdAt: Date.now() },
-                ...f.docs,
-              ],
-            }
-          : f,
-      ),
-    );
-  }, []);
-
-  const deleteDoc = useCallback((ticker: string, id: string) => {
-    setFolders((prev) =>
-      prev.map((f) =>
-        f.ticker === ticker ? { ...f, docs: f.docs.filter((d) => d.id !== id) } : f,
-      ),
-    );
-  }, []);
 
   const addFolder = useCallback(async (ticker: string) => {
     try {

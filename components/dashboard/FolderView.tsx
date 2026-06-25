@@ -15,7 +15,7 @@ import {
 import { formatRelative, formatDate } from "@/lib/trading_notes";
 import type { Note, Folder, Doc } from "@/types";
 import { useQuote } from "@/lib/queries";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 interface FolderViewProps {
   folder: Folder;
@@ -106,14 +106,17 @@ export function FolderView({
   const sorted = [...folder.notes].sort((a, b) => b.updatedAt - a.updatedAt);
   const sortedDocs = [...folder.docs].sort((a, b) => b.createdAt - a.createdAt);
   const [tab, setTab] = useState<"notes" | "docs">("notes");
+  const [tabTicker, setTabTicker] = useState(folder.ticker);
   const [uploading, setUploading] = useState(false);
   const up = change >= 0;
 
   // FolderView stays mounted across ticker switches, so reset to the Notes tab
-  // whenever the selected ticker changes (otherwise the Documents tab carries over).
-  useEffect(() => {
+  // when the selected ticker changes (otherwise the Documents tab carries over).
+  // Done during render, not in an effect, to avoid the cascading re-render.
+  if (folder.ticker !== tabTicker) {
+    setTabTicker(folder.ticker);
     setTab("notes");
-  }, [folder.ticker]);
+  }
 
   const handleFiles = async (files: FileList | null) => {
     if (!files) return;
