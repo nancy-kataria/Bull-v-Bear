@@ -50,13 +50,6 @@ The platform is designed for educational and research purposes. Instead of relyi
 | **Market data** | Finnhub (via a cached server-side proxy) | Live quotes & ticker tape with rate-limit handling and stale-on-error fallback |
 | **Testing & Tooling** | Vitest, ESLint, GitHub Actions (CI) | Unit tests for pure logic, linting, and continuous integration |
 
-### Concepts demonstrated
-- **Retrieval-Augmented Generation (RAG)** — chunking, embeddings, and pgvector cosine similarity (HNSW index)
-- **Multi-agent LLM orchestration** — tool-calling research → parallel Bull/Bear analysts → Judge verdict
-- **Functional core, imperative shell** — pure logic extracted into `lib/` and unit-tested; I/O kept in thin handlers
-- **API resilience** — server-side caching proxy, rate-limit detection, and graceful degradation
-- **Security by default** — server-verified auth, row-level security, signed URLs, and server-only API keys
-
 ---
 
 ## Getting Started
