@@ -8,6 +8,10 @@ The platform is designed for educational and research purposes. Instead of relyi
 
 ---
 
+## Demo
+
+Watch the demo: https://youtu.be/6WgFODCBq1I
+
 ## 🚀 Built With
 
 <div align="center">
