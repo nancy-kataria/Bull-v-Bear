@@ -56,6 +56,39 @@ Watch the demo: https://youtu.be/6WgFODCBq1I
 
 ---
 
+## Architecture
+
+```mermaid
+flowchart LR
+    Browser["Browser"]
+    Auth["Supabase Auth"]
+    App["Next.js 16<br/>pages & API routes"]
+    DB[("PostgreSQL + pgvector<br/>(Supabase)")]
+    Storage["Supabase Storage<br/>private documents"]
+    OpenAI["OpenAI<br/>embeddings + GPT-4o / 4o-mini"]
+    Tavily["Tavily<br/>web search"]
+    Finnhub["Finnhub<br/>market data"]
+
+    Browser -->|"Google / email sign-in"| Auth
+    Browser -->|"pages & API routes"| App
+    Auth -->|"verified session"| App
+    App -->|"notes, documents & chunks<br/>scoped to the user"| DB
+    App -->|"upload / signed URL"| Storage
+    App -->|"tool-calling research,<br/>Bull / Bear / Judge, embeddings"| OpenAI
+    App -->|"live web search tool call"| Tavily
+    App -->|"cached quote & tape requests"| Finnhub
+```
+
+## How it works
+
+- **Retrieval.** Every debate deterministically pulls the user's own notes and documents before the model runs — scoped to the authenticated user's ID and the active ticker via `findRelevantFinance` — alongside live web results from Tavily. Retrieval is never left to the model's own discretion, so a user's research always informs their verdicts.
+- **Multi-agent debate.** A tool-calling research agent (`gpt-4o` + Tavily) gathers context first. Bull and Bear analysts then run **concurrently** (`Promise.all`) on the cheaper `gpt-4o-mini`, each producing structured, Zod-validated arguments where every point carries a `sourceIndex` tying it back to a real source. A final `gpt-4o` Judge synthesizes both sides into a verdict with a confidence score.
+- **Documents.** Uploaded PDFs/DOCX are parsed for text (`unpdf` / `mammoth`); a scanned PDF with no extractable text layer automatically falls back to OCR (`tesseract.js`) before being chunked and embedded — so even scanned filings can inform a verdict.
+- **Market data.** Quotes and the ticker tape sit behind a server-side cache in front of Finnhub, with rate-limit detection and stale-on-error fallback, so the UI never depends on a live third-party call succeeding on every page view.
+- **Security.** Every API route re-verifies the session server-side (`getUser`, not a client-trusted cookie check). Documents live in a private Supabase Storage bucket behind row-level security and are only ever accessed through short-lived signed URLs.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
