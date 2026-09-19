@@ -62,10 +62,10 @@ Watch the demo: https://youtu.be/6WgFODCBq1I
 flowchart LR
     Browser["Browser"]
     Auth["Supabase Auth"]
-    App["Next.js 16<br/>pages & API routes"]
+    App["Frontend & API routes"]
     DB[("PostgreSQL + pgvector<br/>(Supabase)")]
     Storage["Supabase Storage<br/>private documents"]
-    OpenAI["OpenAI<br/>embeddings + GPT-4o / 4o-mini"]
+    OpenAI["OpenAI<br/>embeddings + GPT-4o"]
     Tavily["Tavily<br/>web search"]
     Finnhub["Finnhub<br/>market data"]
 
@@ -76,7 +76,7 @@ flowchart LR
     App -->|"upload / signed URL"| Storage
     App -->|"tool-calling research,<br/>Bull / Bear / Judge, embeddings"| OpenAI
     App -->|"live web search tool call"| Tavily
-    App -->|"cached quote & tape requests"| Finnhub
+    App -->|"live stock data requests"| Finnhub
 ```
 
 ## How it works
